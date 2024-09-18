@@ -1,0 +1,96 @@
+{
+  "name": "ork",
+  "version": "1.1.1",
+  "private": true,
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf backend/dist **/tsconfig.tsbuildinfo tsconfig.tsbuildinfo common/dist auth/dist generic-utils/dist i18n/dist logger/dist rest-core/dist rest-server-express/dist schema-validator/dist service-utils/dist",
+    "lint:ci": "eslint --max-warnings 0 . --ext .tsx,.ts,.jsx,.js --cache -f json -o coverage/eslint-report.json",
+    "lint": "eslint --max-warnings 0 . --ext .tsx,.ts,.jsx,.js --cache",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch --onlyChanged",
+    "markdownlint": "markdownlint **/*.md --ignore node_modules --ignore rest-server-express/node_modules --ignore schema-validator/node_modules --ignore backend/node_modules --ignore common/node_modules -c .markdownlint.jsonc",
+    "generate:schemas": "yarn workspace common create-schemas",
+    "generate:docs": "npx typedoc",
+    "kill": "kill -9 $(lsof -t -i:3040) || true && kill -9 $(lsof -t -i:4040) || true",
+    "reinstall": "rimraf yarn.lock && yarn clean && rimraf node_modules backend/node_modules common/node_modules rest-server-express/node_modules schema-validator/node_modules && yarn install && yarn build",
+    "ci": "yarn install --frozen-lockfile",
+    "cb": "yarn clean  && yarn build",
+    "cspell": "cspell \"**/*.{ts,tsx,md}\" -c ./cspell.config.js --show-suggestions --gitignore",
+    "prepare": "husky install",
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XUND-Solutions-GmbH/ork.git"
+  },
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/XUND-Solutions-GmbH/ork.git"
+  },
+  "homepage": "https://github.com/XUND-Solutions-GmbH/ork.git",
+  "keywords": [
+    "ORK",
+    "kubernetes",
+    "RBAC",
+    "rolebinding"
+  ],
+  "workspaces": [
+    "auth",
+    "generic-utils",
+    "i18n",
+    "logger",
+    "rest-core",
+    "rest-server-express",
+    "schema-validator",
+    "service-utils",
+    "common",
+    "backend"
+  ],
+  "devDependencies": {
+    "@commitlint/config-conventional": "^17.4.4",
+    "@cspell/dict-en-gb": "^4.1.13",
+    "@types/jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "jest-html-reporters": "^3.0.9",
+    "markdownlint-cli": "^0.33.0",
+    "semantic-release": "^21.0.1",
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.3",
+    "@commitlint/cli": "17.6.6",
+    "@typescript-eslint/eslint-plugin": "5.60.1",
+    "@typescript-eslint/parser": "5.60.1",
+    "commitizen": "4.3.0",
+    "conventional-changelog-conventionalcommits": "5.0.0",
+    "cspell": "6.31.1",
+    "cz-customizable": "7.0.0",
+    "eslint": "8.43.0",
+    "eslint-config-prettier": "8.8.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-jsdoc": "43.0.6",
+    "eslint-plugin-prettier": "4.2.1",
+    "husky": "8.0.3",
+    "jest": "29.5.0",
+    "jest-junit": "16.0.0",
+    "jest-stare": "2.5.0",
+    "lint-staged": "13.2.3",
+    "prettier": "2.8.8",
+    "rimraf": "5.0.1",
+    "ts-json-schema-generator": "1.2.0",
+    "typedoc": "0.24.8",
+    "typedoc-plugin-no-inherit": "1.4.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "yarn build",
+      "yarn lint --fix",
+      "git add"
+    ]
+  }
+}

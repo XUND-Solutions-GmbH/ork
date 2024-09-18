@@ -1,0 +1,22 @@
+{
+  "name": "logger",
+  "version": "1.0.36",
+  "description": "Logger package for the ORK stack",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {},
+  "keywords": [
+    "ORK",
+    "utils"
+  ],
+  "author": "itaccounts@xund.ai",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "semaphore-async-await": "1.5.1",
+    "tslib": "2.5.0"
+  },
+  "typings": "./dist/index.d.ts"
+}

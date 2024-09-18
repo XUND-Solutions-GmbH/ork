@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Endpoint<structure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258<\"DELETE\">>": {
+      "properties": {
+        "result": {
+          "description": "The type of the response when the request succeeds"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258<\"GET\">>": {
+      "properties": {
+        "result": {
+          "description": "The type of the response when the request succeeds"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258<\"PATCH\">>": {
+      "properties": {
+        "result": {
+          "description": "The type of the response when the request succeeds"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258<\"POST\">>": {
+      "properties": {
+        "result": {
+          "description": "The type of the response when the request succeeds"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258<\"PUT\">>": {
+      "properties": {
+        "result": {
+          "description": "The type of the response when the request succeeds"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-src_models_api.ts-142-181-src_models_api.ts-132-182-src_models_api.ts-95-182-src_models_api.ts-0-293>": {
+      "properties": {
+        "result": {
+          "additionalProperties": false,
+          "description": "The type of the response when the request succeeds",
+          "properties": {
+            "hostgroups": {
+              "items": {
+                "$ref": "#/definitions/Hostgroup"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "hostgroups"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "type": "object"
+    },
+    "GetHostgroupsEndpoint": {
+      "$ref": "#/definitions/Endpoint%3Cstructure-src_models_api.ts-142-181-src_models_api.ts-132-182-src_models_api.ts-95-182-src_models_api.ts-0-293%3E"
+    },
+    "Hostgroup": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "RestApi": {
+      "additionalProperties": false,
+      "properties": {
+        "DELETE": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22DELETE%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "GET": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22GET%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "PATCH": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22PATCH%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "POST": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22POST%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "PUT": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22PUT%22%3E%3E"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "OrkApi": {
+      "additionalProperties": false,
+      "properties": {
+        "DELETE": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22DELETE%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "GET": {
+          "additionalProperties": false,
+          "properties": {
+            "/hostgroups": {
+              "$ref": "#/definitions/GetHostgroupsEndpoint"
+            }
+          },
+          "required": [
+            "/hostgroups"
+          ],
+          "type": "object"
+        },
+        "PATCH": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22PATCH%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "POST": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22POST%22%3E%3E"
+          },
+          "type": "object"
+        },
+        "PUT": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Endpoint%3Cstructure-794239333-167-207-794239333-157-208-794239333-133-209-794239333-131-215-794239333-103-218-794239333-73-219-794239333-0-258%3C%22PUT%22%3E%3E"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "GET"
+      ],
+      "type": "object"
+    }
+  }
+}

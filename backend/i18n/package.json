@@ -1,0 +1,21 @@
+{
+  "name": "i18n",
+  "version": "2.3.3",
+  "description": "Translation and localization related models, type definitions and utilities",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {},
+  "license": "MPL-2.0",
+  "keywords": [
+    "ORK",
+    "i18n",
+    "localization"
+  ],
+  "author": "itaccounts@xund.ai",
+  "dependencies": {
+  },
+  "typings": "./dist/index.d.ts"
+}

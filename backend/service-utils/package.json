@@ -1,0 +1,22 @@
+{
+  "name": "service-utils",
+  "version": "0.0.32",
+  "description": "Common backend service utilities for the XUND Stach",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {},
+  "keywords": [
+    "ORK",
+    "backend"
+  ],
+  "author": "itaccounts@xund.ai",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "semaphore-async-await": "1.5.1",
+    "tslib": "2.5.0"
+  },
+  "typings": "./dist/index.d.ts"
+}

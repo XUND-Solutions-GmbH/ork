@@ -1,0 +1,23 @@
+{
+  "name": "generic-utils",
+  "version": "1.4.8",
+  "description": "Common utilities for the backend",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {},
+  "keywords": [
+    "ORK",
+    "utils"
+  ],
+  "author": "itaccounts@xund.ai",
+  "license": "MPL-2.0",
+  "devDependencies": {
+  },
+  "dependencies": {
+    "semaphore-async-await": "1.5.1"
+  },
+  "typings": "./dist/index.d.ts"
+}

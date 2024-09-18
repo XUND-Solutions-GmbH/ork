@@ -1,0 +1,42 @@
+{
+  "maxExpiryHours": 12,
+  "rolebindings": [
+    {
+      "user": "smith@xund.ai",
+      "permissions": [
+        {
+          "clusters": ["dev", "uat"],
+          "roleDefinitions": {
+            "roles": [],
+            "clusterRoles": ["operations"]
+          }
+        },
+        {
+          "clusters": ["beta", "class2"],
+          "roleDefinitions": {
+            "roles": [],
+            "clusterRoles": ["cluster-admin"]
+          }
+        }]
+    },
+    {
+      "user": "vinkovits@xund.ai",
+      "permissions": [
+        {
+          "clusters": ["dev", "uat"],
+          "roleDefinitions": {
+            "roles": [],
+            "clusterRoles": ["security"]
+          }
+        },
+        {
+          "clusters": ["medres"],
+          "roleDefinitions": {
+            "roles": [],
+            "clusterRoles": ["cluster-reader"]
+          }
+        }
+      ]
+    }
+  ]
+}

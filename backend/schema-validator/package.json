@@ -1,0 +1,24 @@
+{
+  "name": "schema-validator",
+  "version": "1.1.3",
+  "description": "JSON Schema Validator Utility",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": { "build": "tsc --build"},
+  "keywords": [
+    "ORK",
+    "validation",
+    "schema",
+    "json"
+  ],
+  "author": "itaccounts@xund.ai",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  },
+  "typings": "./dist/index.d.ts"
+}

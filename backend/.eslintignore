@@ -1,0 +1,4 @@
+jest-html-report
+node_modules
+dist
+bundle

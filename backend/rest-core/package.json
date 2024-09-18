@@ -1,0 +1,21 @@
+{
+  "name": "rest-core",
+  "version": "1.1.25",
+  "description": "Core REST utilities and type definitions",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {},
+  "keywords": [
+    "ORK",
+    "validation",
+    "schema",
+    "json"
+  ],
+  "author": "itaccounts@xund.ai",
+  "license": "MPL-2.0",
+  "dependencies": {},
+  "typings": "./dist/index.d.ts"
+}

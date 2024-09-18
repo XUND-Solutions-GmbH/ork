@@ -1,0 +1,17 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+
+[ -z "$NPM_TOKEN" ] && [ -f "$HOME/.zshrc" ] && . "$HOME/.zshrc"
+
+[ -z "$NPM_TOKEN" ] && echo "Error: NPM_TOKEN env var not set and is not defined in $HOME/.zshrc" && exit 1
+
+yarn lint  &
+yarn cspell --no-progress  &
+yarn build  &
+yarn markdownlint &
+
+# Commands defined below this line run only if the concurrent commands defined above run successfully
+for job in $(jobs -p); do wait "$job" || exit 1; done
+
+yarn test
