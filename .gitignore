@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+jest-html-report
 
 # Runtime data
 pids
@@ -47,6 +48,7 @@ web_modules/
 
 # TypeScript cache
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Optional npm cache directory
 .npm
@@ -90,6 +92,10 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+
+# Junit
+junit.xml
+junit-api.xml
 
 # Gatsby files
 .cache/
