@@ -1,7 +1,5 @@
 FROM node:lts-alpine as build
 
-ARG NPM_TOKEN
-
 WORKDIR /home/node/ork
 COPY --chown=node:node . .
 RUN yarn install --ignore-optional \
@@ -58,7 +56,9 @@ COPY --from=build /home/node/ork/common/node_modules /home/node/ork/common/node_
 COPY --from=build /home/node/ork/backend/dist /home/node/ork/backend/dist
 COPY --from=build /home/node/ork/backend/package.json /home/node/ork/backend/package.json
 COPY --from=build /home/node/ork/backend/node_modules /home/node/ork/backend/node_modules
-COPY --chown=node .secure_files/dev-config.yml /home/node/.kube/config-dev
+
+#Copy kube configs
+COPY --chown=node kubeconfig/config-dev /home/node/.kube/config-dev
 
 USER node
 

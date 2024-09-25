@@ -1,0 +1,17 @@
+apiVersion: v1
+clusters:
+- cluster:
+    server: https://sample.k8s.io
+  name: dev
+contexts:
+- context:
+    cluster: dev
+    user: ork-service
+  name: ork-service@dev
+current-context: ork-service@dev
+kind: Config
+preferences: {}
+users:
+- name: ork-service
+  user:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c

@@ -20,7 +20,7 @@
         }]
     },
     {
-      "user": "vinkovits@xund.ai",
+      "user": "taylor@xund.ai",
       "permissions": [
         {
           "clusters": ["dev", "uat"],
