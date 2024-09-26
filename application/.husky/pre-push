@@ -1,11 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-
-[ -z "$NPM_TOKEN" ] && [ -f "$HOME/.zshrc" ] && . "$HOME/.zshrc"
-
-[ -z "$NPM_TOKEN" ] && echo "Error: NPM_TOKEN env var not set and is not defined in $HOME/.zshrc" && exit 1
-
 yarn lint  &
 yarn cspell --no-progress  &
 yarn build  &
