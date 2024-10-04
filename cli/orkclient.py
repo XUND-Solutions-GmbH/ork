@@ -20,8 +20,8 @@ AUTHN_URL = 'https://vouchurl/login'
 WEB_PORTS = [12345, 23456]
 TEST_PAYLOAD = 'ORKTESTORKTEST'
 TEST_PARAM_NAME = 'healthcheck'
-SERVER_URL = 'http://localhost.ork.io:%i/' #used for callback
-HOST = 'localhost.ork.io' #host to be added to host file for callback, must match SERVER_URL
+SERVER_URL = 'http://localhost.example.com:%i/' #used for callback
+HOST = 'localhost.example.com' #host to be added to host file for callback, must match SERVER_URL
 
 class Hostfile:
     def _get_host_file_lines(self):
