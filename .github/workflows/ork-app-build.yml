@@ -20,6 +20,7 @@ jobs:
       with:
         image: ork-authorizer-app
         tags: latest ${{ github.sha }}
+        context: ./application
         containerfiles: |
           ./application/Dockerfile
 
