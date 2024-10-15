@@ -2,6 +2,7 @@
 name: Build ork application image pre PR
 on:
   pull_request:
+    types: [opened, reopened]
     branches-ignore: [ main ]
   schedule:
     - cron: '0 6 * * 1'
