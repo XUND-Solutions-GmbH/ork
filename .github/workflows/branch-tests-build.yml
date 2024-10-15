@@ -1,0 +1,37 @@
+# Build & publish docker images
+name: Build and test ork application on PR
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches-ignore: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build and push ork app image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: './application/.nvmrc'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./application
+
+      - name: Run tests
+        run: npm run test
+        working-directory: ./application
+
+      - name: Build Image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ork-authorizer-app
+          tags: latest ${{ github.sha }}
+          context: ./application
+          containerfiles: |
+            ./application/Dockerfile
