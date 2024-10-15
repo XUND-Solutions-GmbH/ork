@@ -8,7 +8,7 @@
     "patch": "node ./dist/bin/patch.js"
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.18.1",
+    "@kubernetes/client-node": "0.22.0",
     "axios": "0.27.2",
     "body-parser": "1.20.2",
     "cookie-parser": "1.4.6",
