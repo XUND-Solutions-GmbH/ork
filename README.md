@@ -1,5 +1,7 @@
 # ork (On-demand Rolebinding for Kubernetes)
 
+[![Build ork application image](https://github.com/XUND-Solutions-GmbH/ork/actions/workflows/ork-app-build.yml/badge.svg)](https://github.com/XUND-Solutions-GmbH/ork/actions/workflows/ork-app-build.yml)
+
 <pre>
                     .-#%%##%#=.
                     +%*==+=++#%.  #-
