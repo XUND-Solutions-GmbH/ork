@@ -3,7 +3,6 @@ name: Build and test ork application on PR
 on:
   pull_request:
     types: [opened, reopened]
-    branches-ignore: [ main ]
   workflow_dispatch:
 jobs:
   build:
