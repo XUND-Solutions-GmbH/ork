@@ -1,8 +1,11 @@
 # Build & publish docker images
 name: Build and test ork application on PR
+
 on:
   pull_request:
-    types: [opened, reopened]
+    paths:
+      - '**.js'
+
   workflow_dispatch:
 jobs:
   build:
