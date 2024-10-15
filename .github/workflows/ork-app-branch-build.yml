@@ -1,7 +1,7 @@
 # Build & publish docker images
 name: Build ork application image pre PR
 on:
-  push:
+  pull_request:
     branches-ignore: [ main ]
   schedule:
     - cron: '0 6 * * 1'
