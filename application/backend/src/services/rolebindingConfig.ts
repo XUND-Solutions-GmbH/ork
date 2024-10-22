@@ -53,10 +53,8 @@ export class RolebindingConfigService {
             roles: c.roles,
             clusterRoles: c.clusterRoles,
           }
-          ret.clusterRoles.concat(a.clusterRoles)
-          ret.roles.concat(a.roles)
-          ret.clusterRoles = [...new Set(ret.clusterRoles)]
-          ret.roles = [...new Set(ret.roles)]
+          ret.clusterRoles = [...new Set(ret.clusterRoles.concat(a.clusterRoles))]
+          ret.roles = [...new Set(ret.roles.concat(a.roles))]
           return ret
         },
         {
