@@ -6,7 +6,7 @@ import {
   V1ClusterRoleBinding,
   V1ObjectMeta,
   V1RoleRef,
-  V1Subject,
+  RbacV1Subject,
   V1RoleBinding,
 } from '@kubernetes/client-node'
 import moment from 'moment'
@@ -105,7 +105,7 @@ export class KubernetesService {
         binding.roleRef.name = params.role
         binding.roleRef.apiGroup = 'rbac.authorization.k8s.io'
         binding.roleRef.kind = this.isClusterRole(params.role) ? 'ClusterRole' : 'Role'
-        const sbj: V1Subject = new V1Subject()
+        const sbj: RbacV1Subject = new RbacV1Subject()
         sbj.kind = 'User'
         sbj.name = params.username
         binding.subjects = [sbj]
