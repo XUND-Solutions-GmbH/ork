@@ -22,6 +22,8 @@ jobs:
           node-version-file: './application/.nvmrc'
 
       - name: Install dependencies
+        env: 
+          HUSKY: 0
         run: |
           yarn ci
           yarn lint:ci
