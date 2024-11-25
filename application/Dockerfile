@@ -1,4 +1,4 @@
-FROM node:20.18.1 as build
+FROM node:20.18.1-alpine as build
 
 WORKDIR /home/node/ork
 COPY --chown=node:node . .
@@ -12,7 +12,7 @@ RUN yarn install --production \
                  --network-timeout 100000 \
                  --frozen-lockfile
 
-FROM node:20.18.1
+FROM node:20.18.1-alpine
 
 WORKDIR /home/node/ork
 
