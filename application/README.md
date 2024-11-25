@@ -38,7 +38,8 @@ Configuration happens via the `src/accessConfig.json` file. Here you can define 
 }
 ```
 
-For environments you want to control, you need to update the environment list in the `kubernetesService.ts` file's `CLUSTER_LIST` variable. You also need to add the kubeconfig files for the respective environments to the kubeconfig folder with the name format _{environment}_-config and update the Dockerfile to copy these into the image. _ork_ will search for these files in this format when creating bindings.
+For environments you want to control, you need to update the environment list in the `kubernetesService.ts` file's `CLUSTER_LIST` variable.
+You also need to add the kubeconfig files for the respective environments to the kubeconfig folder with the name format _{environment}_-config and update the Dockerfile to copy these into the image. _ork_ will search for these files in this format when creating bindings.
 
 ## Build
 
@@ -47,26 +48,3 @@ To build the application, run `yarn build` and to create the docker image run `d
 ## Run
 
 To run the application start the docker image and expose port 8080.
-
-<pre>
-                    .-#%%##%#=.
-                    +%*==+=++#%.  #-
-                    :@=========+% -@@:
-                :@+*%=%+=**====*+#+%#
-                +##+#**%=@*=+#====*+=+@+
-    -*###+:  *%=+*#*%***+=====+**##=
-    +#****#%:  +@*==============#-
-    @******##   .+%%*++*#*======%=
-    =#******%      .-%#*+======+@:
-    -#*****%-      +#+*+*+++==%%         ---:
-        +#***##     *#==+=====*%@-.      ***#=*
-        .+#**%:.   +%**+**#%@@%##%#=   .+++#**-
-            .##%*+*.  .=#%%@%#####%#%## :#%#*#*=
-            :++%=*+@#####%%@######%%#%%%###%@:
-            -**###%%%%%%*%########%%%%%%%%+.
-            .-#@===-: +%############%+.
-                =:     #%##########%#+
-                        =#%#-----@#%-
-                        %#%*    -@%%*
-
-</pre>
