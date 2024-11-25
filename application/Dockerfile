@@ -1,4 +1,4 @@
-FROM node:lts-alpine as build
+FROM node:20.18.1 as build
 
 WORKDIR /home/node/ork
 COPY --chown=node:node . .
@@ -12,7 +12,7 @@ RUN yarn install --production \
                  --network-timeout 100000 \
                  --frozen-lockfile
 
-FROM node:lts-alpine
+FROM node:20.18.1
 
 WORKDIR /home/node/ork
 
