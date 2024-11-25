@@ -4,6 +4,7 @@ name: Build and test ork application on PR
 on:
   pull_request:
     paths:
+      - '*/Dockerfile'
       - '**.js'
 
   workflow_dispatch:
