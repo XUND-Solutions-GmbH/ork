@@ -63,3 +63,4 @@ COPY --chown=node kubeconfig/config-dev /home/node/.kube/config-dev
 USER node
 
 ENTRYPOINT ["node", "./backend/dist/bin/start.js"]
+
