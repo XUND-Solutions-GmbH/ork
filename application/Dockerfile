@@ -1,4 +1,4 @@
-FROM node:lts-alpine as build
+FROM node:20.18.1-alpine as build
 
 WORKDIR /home/node/ork
 COPY --chown=node:node . .
@@ -12,7 +12,7 @@ RUN yarn install --production \
                  --network-timeout 100000 \
                  --frozen-lockfile
 
-FROM node:lts-alpine
+FROM node:20.18.1-alpine
 
 WORKDIR /home/node/ork
 
@@ -63,3 +63,4 @@ COPY --chown=node kubeconfig/config-dev /home/node/.kube/config-dev
 USER node
 
 ENTRYPOINT ["node", "./backend/dist/bin/start.js"]
+

@@ -4,6 +4,7 @@ name: Build and test ork application on PR
 on:
   pull_request:
     paths:
+      - '*/Dockerfile'
       - '**.js'
 
   workflow_dispatch:
@@ -21,11 +22,16 @@ jobs:
           node-version-file: './application/.nvmrc'
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ./application
-
-      - name: Run tests
-        run: npm run test
+        env: 
+          HUSKY: 0
+        run: |
+          yarn ci
+          yarn lint:ci
+          yarn cspell
+          yarn markdownlint
+          yarn build
+          yarn test:coverage
+          yarn list --depth=100
         working-directory: ./application
 
       - name: Build Image
