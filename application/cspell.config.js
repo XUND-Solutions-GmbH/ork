@@ -22,4 +22,7 @@ module.exports = {
   allowCompoundWords: true,
   // import - make cspell use additional external dictionaries downloaded from npm packages (like @cspell/dict-de-de)
   import: ['@cspell/dict-en-gb/cspell-ext.json'],
+  // ignore js as it is either generated or coming from somewhere else
+  ignorePaths: ['**/jest.config.ts']
+
 }

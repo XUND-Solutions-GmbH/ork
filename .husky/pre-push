@@ -1,12 +1,12 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn lint  &
-yarn cspell --no-progress  &
-yarn build  &
-yarn markdownlint &
+yarn workspace application lint  &
+yarn workspace application cspell --no-progress  &
+yarn workspace application build  &
+yarn workspace application markdownlint &
 
 # Commands defined below this line run only if the concurrent commands defined above run successfully
 for job in $(jobs -p); do wait "$job" || exit 1; done
 
-yarn test
+yarn workspace application test

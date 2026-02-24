@@ -11,6 +11,8 @@ import { useAuthentication } from '../middlewares/authentication'
 import { getLoggerForService } from './logger'
 import { RolebindingSchedulerService } from './rolebindingSchedulerService'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
+import { AuthorizationController } from '../controllers'
+import { Evaluator } from './evaluator'
 
 /**
  * Service that's responsible for serving the public API endpoint
@@ -74,7 +76,16 @@ export class ORKWeb {
       kubernetesService,
     )
     await this.rolebindingSchedulerService.init()
-    this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService }))
+    const authorizationController = new AuthorizationController({ config: this.options.config })
+    authorizationController.addChain(KubernetesService.AREA_NAME, kubernetesService, [
+      (this.rolebindingConfigService || new RolebindingConfigService()) as Evaluator,
+    ])
+
+    this.expressApp.use(
+      this.options.config.route,
+      createOrkApiRoutes({ kubernetesService, authorizationController }),
+    )
+
 
     this.expressApp.use(
       createErrorHandler({
@@ -143,5 +154,5 @@ export class ORKWeb {
       config: ConfigValues
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
-  ) {}
+  ) { }
 }
