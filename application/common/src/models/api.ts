@@ -50,12 +50,14 @@ export type AddRolebindingToClusterEndpoint = PostEntityEndpointOnEntity<
 >
 export type GetAccessInfoForUserEndpoint = Endpoint<{
   urlParameters: { area: string; target?: string }
-  result: { status: string; permissions?: TargetPermissionsForUserResponse }
+  result: { permissions?: TargetPermissionsForUserResponse }
 }>
-export type AuthorizeUserForTargetEndpoint = PostEntityEndpoint<
-  { result: { status: string; data?: string } },
+export type AuthorizeUserForTargetEndpoint = PostEntityEndpoint<{
+  data?: string
+},
   AuthorizationRequest
 >
+
 
 export interface ORKApi extends RestApi {
   GET: {

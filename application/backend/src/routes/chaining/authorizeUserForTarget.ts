@@ -26,18 +26,18 @@ export const createAuthorizeUserForTarget =
                 const authResult = await authorizeUser(params)
                 if (!authResult) {
                     return {
-                        code: 400,
-                        data: { result: { status: '404' } },
+                        code: 404,
+                        data: {},
                     }
                 } else if (authResult.expiryHours === 0) {
                     return {
                         code: 403,
-                        data: { result: { status: authResult.message } },
+                        data: { data: authResult.message },
                     }
                 } else {
                     return {
                         code: 201,
-                        data: { result: { status: authResult.message, data: `${authResult.expiryHours}` } },
+                        data: { data: `${authResult.expiryHours}` },
                     }
                 }
             } catch (error) {

@@ -18,14 +18,14 @@ export const createGetAccessInfoForUsers =
             const allowedAuthorizations = await getAuthorizationInfo({ area, username, target })
             if (!allowedAuthorizations) {
                 return {
-                    code: 400,
-                    data: { status: '404' },
+                    code: 404,
+                    data: {},
                 }
             }
             if (!allowedAuthorizations.allowedPermissionsPerTarget) {
                 return {
                     code: 200,
-                    data: { status: '200', permissions: { area } as TargetPermissionsForUserResponse },
+                    data: { permissions: { area } as TargetPermissionsForUserResponse },
                 }
             }
 
@@ -40,7 +40,6 @@ export const createGetAccessInfoForUsers =
             return {
                 code: 200,
                 data: {
-                    status: '200',
                     permissions: responseData,
                 },
             }
