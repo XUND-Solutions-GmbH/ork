@@ -72,9 +72,7 @@
     "typedoc": "0.24.8",
     "typedoc-plugin-no-inherit": "1.4.0"
   },
-  "resolutions": {
-    "ajv": "8.17.1"
-  },
+  "resolutions": {},
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
