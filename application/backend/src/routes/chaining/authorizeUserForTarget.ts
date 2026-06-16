@@ -10,44 +10,44 @@ import { MissingParamError } from '../../errors'
  * @returns {EndpointImplementation<AuthorizeUserForTargetEndpoint>} the created endpoint
  */
 export const createAuthorizeUserForTarget =
-    (authorizationController: AuthorizationController): EndpointImplementation<AuthorizeUserForTargetEndpoint> =>
-        async ({ request, urlParameters }) => {
-            const contextObject = request.body.context ? JSON.parse(request.body.context) : undefined
-            const parsedContext = contextObject ? new Map<string, string>(Object.entries(contextObject)) : undefined
-            try {
-                const params = {
-                    area: urlParameters.area,
-                    username: getKubernetesUserFromHeader(request.headers['x-vouch-user']),
-                    target: urlParameters.target,
-                    permission: request.body.permission,
-                    context: parsedContext,
-                }
-                const authorizeUser = authorizationController.implAuthorizeUser()
-                const authResult = await authorizeUser(params)
-                if (!authResult) {
-                    return {
-                        code: 404,
-                        data: {},
-                    }
-                } else if (authResult.expiryHours === 0) {
-                    return {
-                        code: 403,
-                        data: { data: authResult.message },
-                    }
-                } else {
-                    return {
-                        code: 201,
-                        data: { data: `${authResult.expiryHours}` },
-                    }
-                }
-            } catch (error) {
-                if (error instanceof MissingParamError) {
-                    const err = error
-                    return {
-                        code: 400,
-                        data: { result: { status: err.integrationErrorType!.toString(), data: err.details?.description } },
-                    }
-                }
-                throw error
-            }
+  (authorizationController: AuthorizationController): EndpointImplementation<AuthorizeUserForTargetEndpoint> =>
+  async ({ request, urlParameters }) => {
+    const contextObject = request.body.context ? JSON.parse(request.body.context) : undefined
+    const parsedContext = contextObject ? new Map<string, string>(Object.entries(contextObject)) : undefined
+    try {
+      const params = {
+        area: urlParameters.area,
+        username: getKubernetesUserFromHeader(request.headers['x-vouch-user']),
+        target: urlParameters.target,
+        permission: request.body.permission,
+        context: parsedContext,
+      }
+      const authorizeUser = authorizationController.implAuthorizeUser()
+      const authResult = await authorizeUser(params)
+      if (!authResult) {
+        return {
+          code: 404,
+          data: {},
         }
+      } else if (authResult.expiryHours === 0) {
+        return {
+          code: 403,
+          data: { data: authResult.message },
+        }
+      } else {
+        return {
+          code: 201,
+          data: { data: `${authResult.expiryHours}` },
+        }
+      }
+    } catch (error) {
+      if (error instanceof MissingParamError) {
+        const err = error
+        return {
+          code: 400,
+          data: { result: { status: err.integrationErrorType!.toString(), data: err.details?.description } },
+        }
+      }
+      throw error
+    }
+  }

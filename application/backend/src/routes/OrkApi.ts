@@ -1,9 +1,9 @@
 import { createMiddleware } from '../../../rest-server-express/dist'
 import { ORKApi } from '../../../common/dist'
 import { KubernetesService } from '../services'
+import { AuthorizationController } from '../controllers/authorizationController'
 import { createGetUserRolebindingsRoute } from './rolebindingConfig'
 import { createAddRolebindingToClusterRoute } from './kubernetes'
-import { AuthorizationController } from '../controllers/authorizationController'
 import { createAuthorizeUserForTarget, createGetAccessInfoForUsers } from './chaining'
 
 /**
@@ -13,7 +13,10 @@ import { createAuthorizeUserForTarget, createGetAccessInfoForUsers } from './cha
  * @param options.authorizationController controller to call with API
  * @returns the created API Routes middleware
  */
-export const createOrkApiRoutes = (options: { kubernetesService: KubernetesService, authorizationController: AuthorizationController }) =>
+export const createOrkApiRoutes = (options: {
+  kubernetesService: KubernetesService
+  authorizationController: AuthorizationController
+}) =>
   createMiddleware<ORKApi>({
     GET: {
       '/:area/authorization': createGetAccessInfoForUsers(options.authorizationController),

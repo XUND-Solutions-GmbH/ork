@@ -52,12 +52,12 @@ export type GetAccessInfoForUserEndpoint = Endpoint<{
   urlParameters: { area: string; target?: string }
   result: { permissions?: TargetPermissionsForUserResponse }
 }>
-export type AuthorizeUserForTargetEndpoint = PostEntityEndpoint<{
-  data?: string
-},
+export type AuthorizeUserForTargetEndpoint = PostEntityEndpoint<
+  {
+    data?: string
+  },
   AuthorizationRequest
 >
-
 
 export interface ORKApi extends RestApi {
   GET: {

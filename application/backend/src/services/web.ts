@@ -8,11 +8,11 @@ import { createErrorHandler, createNotFoundHandler } from '../handlers'
 import { LogLifecycle } from '../utils/add-lifecycle-logging'
 import { createOrkApiRoutes } from '../routes/OrkApi'
 import { useAuthentication } from '../middlewares/authentication'
+import { AuthorizationController } from '../controllers'
 import { getLoggerForService } from './logger'
 import { RolebindingSchedulerService } from './rolebindingSchedulerService'
-import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
-import { AuthorizationController } from '../controllers'
 import { Evaluator } from './evaluator'
+import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 
 /**
  * Service that's responsible for serving the public API endpoint
@@ -81,11 +81,7 @@ export class ORKWeb {
       (this.rolebindingConfigService || new RolebindingConfigService()) as Evaluator,
     ])
 
-    this.expressApp.use(
-      this.options.config.route,
-      createOrkApiRoutes({ kubernetesService, authorizationController }),
-    )
-
+    this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService, authorizationController }))
 
     this.expressApp.use(
       createErrorHandler({
@@ -154,5 +150,5 @@ export class ORKWeb {
       config: ConfigValues
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
-  ) { }
+  ) {}
 }
