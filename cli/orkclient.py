@@ -15,13 +15,12 @@ try:
 except ImportError:
     from urllib.parse import urlencode
 
-AUTHZ_URL = 'https://orkapplicationurl'
+AUTHZ_URL = 'https://orkapplicationurl/' #needs to end with /
 AUTHN_URL = 'https://vouchurl/login'
 WEB_PORTS = [12345, 23456]
 TEST_PAYLOAD = 'ORKTESTORKTEST'
 TEST_PARAM_NAME = 'healthcheck'
-SERVER_URL = 'http://localhost.example.com:%i/' #used for callback
-HOST = 'localhost.example.com' #host to be added to host file for callback, must match SERVER_URL
+HOST = 'localhost.example.com' #host to be added and used in host file for callback
 
 class Hostfile:
     def _get_host_file_lines(self):
@@ -59,7 +58,7 @@ class Hostfile:
                 output.write('\n')
             return not skip
 
-class VouchClient:
+class LocalDummyServer:
     def get_server(self, app):
         for port in WEB_PORTS:
             try:
@@ -77,7 +76,7 @@ class VouchClient:
         server_thread.start()
         try:
             test_resp = requests.get(
-                SERVER_URL % server.socket.getsockname()[1],
+                'http://%s:%i' % (HOST, server.socket.getsockname()[1]),
                 params = {TEST_PARAM_NAME: TEST_PAYLOAD})
             test_resp.raise_for_status()
             assert self._domain_working is True, 'Localhost domain check unexpected state'
@@ -129,7 +128,7 @@ class VouchClient:
 
         return_uri = None
         server = self.get_server(_vouch_token_app)
-        return_uri = SERVER_URL % server.socket.getsockname()[1]
+        return_uri = 'http://%s:%i' % (HOST, server.socket.getsockname()[1])
         self._test_server(server)
         rquery = {}
         rquery['X-Vouch-Token'] = ''
@@ -153,44 +152,41 @@ class VouchClient:
             return None
         return self._retrieved_code
 
-def resolve_rolebindings(cluster):
-    userrolebindings_resp = requests.get(
-        AUTHZ_URL + 'api/v1/userrolebindings',
+def resolve_permissions(area, target):
+    permissions_resp = requests.get(
+        AUTHZ_URL + 'api/v1/%s/authorization' % (area if target is None else '%s/%s' % (area, target)),
         headers = {'Cookie': vouch_cookie})
-    userrolebindings_resp.raise_for_status()
-    if userrolebindings_resp.status_code != 200:
-        print('Error getting possible rolebindings for user: %s' % userrolebindings_resp.text)
+    permissions_resp.raise_for_status()
+    if permissions_resp.status_code != 200:
+        print('Error getting possible permissions for user: %s' % permissions_resp.text)
         return None
     else:
-        userrolebindings_data = userrolebindings_resp.json()
-        for cluster_data in userrolebindings_data['result']['rolebindings']:
-            if cluster_data['cluster'] == cluster:
-                merged_roles = cluster_data['roles'] + cluster_data['clusterRoles']
-                while True:
-                    print('Rolebinding options:\n %s' % merged_roles)
-                    rolebinding = input('Select a rolebinding to request:')
-                    if rolebinding in merged_roles:
-                        return rolebinding
-                    else:
-                        print('Rolebinding not in options')
+        permissions_data = permissions_resp.json()
+        while True:
+            print('Permission options:\n %s' % permissions_data['permissions']['permissions'])
+            permission = input('Select a permission to request:')
+            if permission in permissions_data['permissions']['permissions']:
+                return permission
+            else:
+                print('Permission not in options')
 
-def add_rolebinding(cluster, rolebinding, vouch_cookie):
-    rolebinding_resp = requests.post(
-        AUTHZ_URL + 'api/v1/clusters/' + cluster + '/rolebindings',
+def add_permission(area, target, permission, vouch_cookie):
+    permission_resp = requests.post(
+        AUTHZ_URL + 'api/v1/%s/authorization' % (area if target is None else '%s/%s' % (area, target)),
         headers = {'Cookie': vouch_cookie},
-        json = {"role" : rolebinding})
-    rolebinding_resp.raise_for_status()
-    if rolebinding_resp.status_code != 201:
-        print('Error adding rolebinding: %s' % rolebinding_resp.text)
+        json = {"permission" : permission})
+    permission_resp.raise_for_status()
+    if permission_resp.status_code != 201:
+        print('Error adding permission: %s' % permission_resp.text)
     else:
-        print('User authorized for ' + rolebinding + ' on ' + cluster)
+        print('User authorized for %s on %s' % (permission, area if target is None else '%s:%s' % (area, target)))
 
 def get_vouchcookie(start_browser, vouch_cookie):
     if vouch_cookie:
         vouch_cookie = 'VouchCookie=' + args.vouch_cookie
         return vouch_cookie
     else:
-        vouch_cookie = VouchClient().get_new_token(start_browser)
+        vouch_cookie = LocalDummyServer().get_new_token(start_browser)
         if vouch_cookie == False:
             return None
         else:
@@ -198,28 +194,37 @@ def get_vouchcookie(start_browser, vouch_cookie):
 
 if __name__ == '__main__':
     try:
-        k8s_envs = ['dev']
+        targets_per_area = {
+            "kubernetes": ['dev']
+        }
         parser = argparse.ArgumentParser()
         parser.add_argument('-b', action='store_true', dest='start_browser', help='start browser for login')
         parser.add_argument('-s', action='store_true', dest='setup', help='only setup hosts file but dont start authz flow')
         parser.add_argument('-v', dest='vouch_cookie', help='vouch cookie value to use for authentication')
-        parser.add_argument('-k', dest='k8s_env', help='k8s cluster to connect to: ' + ','.join(k8s_envs))
+        parser.add_argument('-a', dest='area', help='area to connect to: ' + ','.join(targets_per_area.keys()))
+        parser.add_argument('-t', dest='target', help='target to connect to in area')
 
         args = parser.parse_args()
 
         if args.setup:
             added = Hostfile().add(HOST)
             print('Updated hostfile: %s' % added)
-        elif args.k8s_env is not None:
-            assert args.k8s_env in k8s_envs, 'Kubernetes environment not recognized'
+        elif args.area is not None:
+            assert args.area in targets_per_area.keys(), 'Area not recognized, options: %s' % ','.join(targets_per_area.keys())
+            if args.target:
+                assert args.target in targets_per_area.get(args.area), 'Target not recognized, options: %s' % ','.join(targets_per_area.get(args.area))
+            elif len(targets_per_area.get(args.area)) > 0:
+                print('Target required, options: %s' % ','.join(targets_per_area.get(args.area)))
+                sys.exit(1)
+
             vouch_cookie = get_vouchcookie(args.start_browser, args.vouch_cookie)
             assert vouch_cookie is not None, 'Did not succeed getting vouch cookie. Check logs!'
 
-            rolebinding = resolve_rolebindings(args.k8s_env)
-            assert rolebinding is not None, 'Could not resolve possible rolebindings'
-            add_rolebinding(args.k8s_env, rolebinding, vouch_cookie)
+            permission = resolve_permissions(args.area, args.target)
+            assert permission is not None, 'Could not resolve possible permissions'
+            add_permission(args.area, args.target, permission, vouch_cookie)
         else:
-            print('Missing parameter -k')
+            print('Missing parameter -a')
             sys.exit(1)
     except AssertionError as msg: 
         print(msg)
