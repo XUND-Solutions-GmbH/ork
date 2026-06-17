@@ -19,12 +19,12 @@ export const createOrkApiRoutes = (options: {
 }) =>
   createMiddleware<ORKApi>({
     GET: {
-      '/:area/authorization': createGetAccessInfoForUsers(options.authorizationController),
-      '/:area/:target/authorization': createGetAccessInfoForUsers(options.authorizationController),
+      '/areas/:area/authorizations': createGetAccessInfoForUsers(options.authorizationController),
+      '/areas/:area/targets/:target/authorizations': createGetAccessInfoForUsers(options.authorizationController),
       '/userrolebindings/': createGetUserRolebindingsRoute(),
     },
     POST: {
-      '/:area/:target/authorization': createAuthorizeUserForTarget(options.authorizationController),
+      '/areas/:area/targets/:target/authorizations': createAuthorizeUserForTarget(options.authorizationController),
       '/clusters/:id/rolebindings/': createAddRolebindingToClusterRoute(options.kubernetesService),
     },
   })

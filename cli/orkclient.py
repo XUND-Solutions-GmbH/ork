@@ -154,7 +154,7 @@ class LocalDummyServer:
 
 def resolve_permissions(area, target):
     permissions_resp = requests.get(
-        AUTHZ_URL + 'api/v1/%s/authorization' % (area if target is None else '%s/%s' % (area, target)),
+        AUTHZ_URL + 'api/v1/areas/%s/authorizations' % (area if target is None else '%s/targets/%s' % (area, target)),
         headers = {'Cookie': vouch_cookie})
     permissions_resp.raise_for_status()
     if permissions_resp.status_code != 200:
@@ -172,7 +172,7 @@ def resolve_permissions(area, target):
 
 def add_permission(area, target, permission, vouch_cookie):
     permission_resp = requests.post(
-        AUTHZ_URL + 'api/v1/%s/authorization' % (area if target is None else '%s/%s' % (area, target)),
+        AUTHZ_URL + 'api/v1/areas/%s/authorizations' % (area if target is None else '%s/targets/%s' % (area, target)),
         headers = {'Cookie': vouch_cookie},
         json = {"permission" : permission})
     permission_resp.raise_for_status()

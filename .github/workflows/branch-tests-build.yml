@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Build and push ork app image
-    runs-on: ubuntu-latest
+    runs-on: node:lts-alpine
 
     steps:
       - uses: actions/checkout@v2

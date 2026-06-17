@@ -61,12 +61,12 @@ export type AuthorizeUserForTargetEndpoint = PostEntityEndpoint<
 
 export interface ORKApi extends RestApi {
   GET: {
-    '/:area/authorization': GetAccessInfoForUserEndpoint
-    '/:area/:target/authorization': GetAccessInfoForUserEndpoint
+    '/areas/:area/authorizations': GetAccessInfoForUserEndpoint
+    '/areas/:area/targets/:target/authorizations': GetAccessInfoForUserEndpoint
     '/userrolebindings/': GetUserRolebindingsEndpoint
   }
   POST: {
-    '/:area/:target/authorization': AuthorizeUserForTargetEndpoint
+    '/areas/:area/targets/:target/authorizations': AuthorizeUserForTargetEndpoint
     '/clusters/:id/rolebindings/': AddRolebindingToClusterEndpoint
   }
 }
