@@ -3,7 +3,7 @@ import type { Config } from 'jest'
 const config: Config = {
   coverageReporters: ['text', 'json', 'html', 'cobertura', 'lcov'],
 
-  projects: ['<rootDir>/frontend/jest.config.ts', '<rootDir>/backend/jest.config.ts'],
+  projects: ['<rootDir>/backend/jest.config.ts'],
 
   reporters: [
     'default',

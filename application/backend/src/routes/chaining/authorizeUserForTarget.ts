@@ -12,9 +12,10 @@ import { MissingParamError } from '../../errors'
 export const createAuthorizeUserForTarget =
   (authorizationController: AuthorizationController): EndpointImplementation<AuthorizeUserForTargetEndpoint> =>
   async ({ request, urlParameters }) => {
-    const contextObject = request.body.context ? JSON.parse(request.body.context) : undefined
-    const parsedContext = contextObject ? new Map<string, string>(Object.entries(contextObject)) : undefined
     try {
+      const parsedContext = request.body.context
+        ? new Map<string, string>(Object.entries(request.body.context))
+        : undefined
       const params = {
         area: urlParameters.area,
         username: getKubernetesUserFromHeader(request.headers['x-vouch-user']),
@@ -47,7 +48,8 @@ export const createAuthorizeUserForTarget =
           code: 400,
           data: { result: { status: err.integrationErrorType!.toString(), data: err.details?.description } },
         }
+      } else {
+        throw error
       }
-      throw error
     }
   }
