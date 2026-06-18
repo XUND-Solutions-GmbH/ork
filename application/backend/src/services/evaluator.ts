@@ -7,6 +7,7 @@ export interface Evaluator {
    */
   implEvaluateAccess: () => (params: {
     username: string
+    area?: string
     target?: string
     permission?: string
     context?: Map<string, string>
@@ -19,8 +20,8 @@ export interface Evaluator {
    */
   implGetAccessesInfo: () => (params: {
     username: string
+    area?: string
     target?: string
-    context?: Map<string, string>
   }) => Promise<AuthorizationInfo>
 }
 

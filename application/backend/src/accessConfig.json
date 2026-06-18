@@ -1,6 +1,14 @@
 {
   "maxExpiryHours": 12,
   "userHeaderName": "x-vouch-user",
+  "mosyleEnforcement": [
+    {
+      "area": "kubernetes",
+      "targets": [
+        "class2"
+      ]
+    }
+  ],
   "rolebindings": [
     {
       "user": "smith@xund.ai",

@@ -12,8 +12,11 @@ describe('ORK module', () => {
       environment: 'TEST',
       port: Math.round(Math.random() * 9999) + 10000,
     })
-
-    return new ORKWeb({ config })
+    const mockMosyleService = {
+      implEvaluateAccess: jest.fn().mockReturnValue(async () => ({ expiryHours: undefined })),
+      implGetAccessesInfo: jest.fn().mockReturnValue(async () => ({ allowedPermissionsPerTarget: undefined })),
+    }
+    return new ORKWeb({ config }, undefined, mockMosyleService as any)
   }
 
   it('Should handle server status updates', async () => {
