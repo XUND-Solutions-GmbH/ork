@@ -1,10 +1,8 @@
 import { EndpointImplementation } from '../../../../rest-server-express'
 import { GetUserRolebindingsEndpoint, PermissionsForUserResponse } from '../../../../common'
-import { RolebindingConfigService } from '../../services'
-import getKubernetesUserFromHeader from '../../utils/getKubernetesUserFromHeader'
-import { AccessConfigService, RolebindingConfigService } from '../../services'
+import { RolebindingConfigService, AccessConfigService } from '../../services'
+import { getKubernetesUserFromHeader } from '../../utils/getKubernetesUserFromHeader'
 import { rolebindingConfigExtractor } from '../../services/rolebindingConfig'
-
 
 /**
  * Creates and endpoint for listing roles from config
@@ -12,30 +10,30 @@ import { rolebindingConfigExtractor } from '../../services/rolebindingConfig'
  */
 export const createGetUserRolebindingsRoute =
   (): EndpointImplementation<GetUserRolebindingsEndpoint> =>
-    async ({ request }) => {
-      const rolebindingConfigService = new RolebindingConfigService(AccessConfigService.extract(rolebindingConfigExtractor))
-      const permissionsPerCluster = rolebindingConfigService.getPermissionsForUser(
-        getKubernetesUserFromHeader(request.headers['x-vouch-user']),
-      )
+  async ({ request }) => {
+    const rolebindingConfigService = new RolebindingConfigService(
+      AccessConfigService.extract(rolebindingConfigExtractor),
+    )
+    const permissionsPerCluster = rolebindingConfigService.getPermissionsForUser(getKubernetesUserFromHeader(request))
 
-      const clusterPermissionsResponse: PermissionsForUserResponse[] = []
-      if (permissionsPerCluster === undefined)
-        return {
-          code: 404,
-          data: { result: { rolebindings: clusterPermissionsResponse } },
-        }
-
-      for (const c of permissionsPerCluster.keys()) {
-        const permissions: PermissionsForUserResponse = {
-          cluster: c,
-          roles: permissionsPerCluster.get(c)?.roles,
-          clusterRoles: permissionsPerCluster.get(c)?.clusterRoles,
-        }
-        clusterPermissionsResponse.push(permissions)
-      }
-
+    const clusterPermissionsResponse: PermissionsForUserResponse[] = []
+    if (permissionsPerCluster === undefined)
       return {
-        code: 200,
+        code: 404,
         data: { result: { rolebindings: clusterPermissionsResponse } },
       }
+
+    for (const c of permissionsPerCluster.keys()) {
+      const permissions: PermissionsForUserResponse = {
+        cluster: c,
+        roles: permissionsPerCluster.get(c)?.roles,
+        clusterRoles: permissionsPerCluster.get(c)?.clusterRoles,
+      }
+      clusterPermissionsResponse.push(permissions)
     }
+
+    return {
+      code: 200,
+      data: { result: { rolebindings: clusterPermissionsResponse } },
+    }
+  }

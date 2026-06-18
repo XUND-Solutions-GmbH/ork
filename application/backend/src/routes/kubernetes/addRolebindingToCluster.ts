@@ -1,7 +1,7 @@
 import { EndpointImplementation } from '../../../../rest-server-express'
 import { AddRolebindingToClusterEndpoint } from '../../../../common'
 import { KubernetesService } from '../../services'
-import getKubernetesUserFromHeader from '../../utils/getKubernetesUserFromHeader'
+import { getKubernetesUserFromHeader } from '../../utils/getKubernetesUserFromHeader'
 
 /**
  * Creates and endpoint to add a rolebinding to the cluster via KubeAPI
@@ -15,7 +15,7 @@ export const createAddRolebindingToClusterRoute =
     const addRolebindingToCluster = kubernetesService.implAddRolebindingToCluster()
     const params = {
       cluster: request.params.id,
-      username: getKubernetesUserFromHeader(request.headers['x-vouch-user']),
+      username: getKubernetesUserFromHeader(request),
       role: request.body.role,
     }
     const status = await addRolebindingToCluster(params)

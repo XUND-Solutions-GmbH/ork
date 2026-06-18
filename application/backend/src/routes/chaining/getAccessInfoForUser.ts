@@ -1,7 +1,7 @@
 import { EndpointImplementation } from '../../../../rest-server-express'
 import { GetAccessInfoForUserEndpoint, TargetPermissionsForUserResponse } from '../../../../common'
 import { AuthorizationController } from '../../controllers'
-import getKubernetesUserFromHeader from '../../utils/getKubernetesUserFromHeader'
+import { getKubernetesUserFromHeader } from '../../utils/getKubernetesUserFromHeader'
 
 /**
  * Description placeholder
@@ -12,7 +12,7 @@ export const createGetAccessInfoForUsers =
   (authorizationController: AuthorizationController): EndpointImplementation<GetAccessInfoForUserEndpoint> =>
   async ({ request, urlParameters }) => {
     const { area, target } = urlParameters
-    const username = getKubernetesUserFromHeader(request.headers['x-vouch-user'])
+    const username = getKubernetesUserFromHeader(request)
 
     const getAuthorizationInfo = authorizationController.implGetChainInfo()
     const allowedAuthorizations = await getAuthorizationInfo({ area, username, target })

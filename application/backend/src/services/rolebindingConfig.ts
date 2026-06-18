@@ -15,7 +15,6 @@ export const rolebindingConfigExtractor = (raw: RawAccessConfig): RolebindingCon
   rolebindings: raw.rolebindings,
 })
 
-
 type ClusterPermission = {
   user: string
   permissions: Array<{
@@ -32,7 +31,6 @@ type RoleDefinition = {
 export class RolebindingConfigService implements Evaluator {
   public rolebindingConfig: RolebindingConfiguration
   /**
-   *
    * @param {RolebindingConfiguration} rolebindingConfig an object containing the config for rolebind management
    */
   constructor(rolebindingConfig: RolebindingConfiguration) {
@@ -48,21 +46,21 @@ export class RolebindingConfigService implements Evaluator {
    */
   implEvaluateAccess =
     () =>
-      async (params: {
-        username: string
-        target?: string
-        permission?: string
-        context?: Map<string, string>
-      }): Promise<EvaluationResult> => {
-        if (!params.target) throw new MissingParamError('kubernetes', 'target')
-        if (!params.permission) throw new MissingParamError('kubernetes', 'permission')
-        const accessLength = this.getUserClusterAccess(params.username, params.target, params.permission)
-        if (accessLength) {
-          return { expiryHours: accessLength }
-        } else {
-          return { expiryHours: 0 }
-        }
+    async (params: {
+      username: string
+      target?: string
+      permission?: string
+      context?: Map<string, string>
+    }): Promise<EvaluationResult> => {
+      if (!params.target) throw new MissingParamError('kubernetes', 'target')
+      if (!params.permission) throw new MissingParamError('kubernetes', 'permission')
+      const accessLength = this.getUserClusterAccess(params.username, params.target, params.permission)
+      if (accessLength) {
+        return { expiryHours: accessLength }
+      } else {
+        return { expiryHours: 0 }
       }
+    }
 
   /**
    * @param params.username user to evaluate access for as coming from vouch header
@@ -72,32 +70,32 @@ export class RolebindingConfigService implements Evaluator {
    */
   implGetAccessesInfo =
     () =>
-      async (params: {
-        username: string
-        target?: string
-        context?: Map<string, string>
-      }): Promise<AuthorizationInfo> => {
-        if (params.target) {
-          const permissions = this.getClusterPermissionsForUser(params.username, params.target)
-          return {
-            allowedPermissionsPerTarget: [
-              {
-                target: params.target,
-                permissions: permissions.clusterRoles.concat(permissions.roles),
-              },
-            ],
-          }
-        } else {
-          const permissionsPerTarget = this.getPermissionsForUser(params.username)
-          return {
-            allowedPermissionsPerTarget: Array.from(permissionsPerTarget).flatMap(([cluster, roles]) =>
-              !roles || (roles.clusterRoles.length === 0 && roles.roles.length === 0)
-                ? []
-                : [{ target: cluster, permissions: roles.clusterRoles.concat(roles.roles) }],
-            ),
-          }
+    async (params: {
+      username: string
+      target?: string
+      context?: Map<string, string>
+    }): Promise<AuthorizationInfo> => {
+      if (params.target) {
+        const permissions = this.getClusterPermissionsForUser(params.username, params.target)
+        return {
+          allowedPermissionsPerTarget: [
+            {
+              target: params.target,
+              permissions: permissions.clusterRoles.concat(permissions.roles),
+            },
+          ],
+        }
+      } else {
+        const permissionsPerTarget = this.getPermissionsForUser(params.username)
+        return {
+          allowedPermissionsPerTarget: Array.from(permissionsPerTarget).flatMap(([cluster, roles]) =>
+            !roles || (roles.clusterRoles.length === 0 && roles.roles.length === 0)
+              ? []
+              : [{ target: cluster, permissions: roles.clusterRoles.concat(roles.roles) }],
+          ),
         }
       }
+    }
 
   /**
    * A function to get a list of role names for a user for specific cluster
