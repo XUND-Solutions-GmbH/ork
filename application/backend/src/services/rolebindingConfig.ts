@@ -3,11 +3,17 @@ import _accessConfig from '../accessConfig.json'
 import { MissingParamError } from '../errors'
 import { CLUSTER_LIST } from './kubernetesService'
 import { AuthorizationInfo, EvaluationResult, Evaluator } from './evaluator'
+import { RawAccessConfig } from './accessConfigService'
 
 export type RolebindingConfiguration = {
   maxExpiryHours: number
   rolebindings: ClusterPermission[]
 }
+
+export const rolebindingConfigExtractor = (raw: RawAccessConfig): RolebindingConfiguration => ({
+  maxExpiryHours: raw.maxExpiryHours,
+  rolebindings: raw.rolebindings,
+})
 
 type ClusterPermission = {
   user: string
@@ -25,11 +31,10 @@ type RoleDefinition = {
 export class RolebindingConfigService implements Evaluator {
   public rolebindingConfig: RolebindingConfiguration
   /**
-   *
    * @param {RolebindingConfiguration} rolebindingConfig an object containing the config for rolebind management
    */
-  constructor(rolebindingConfig?: RolebindingConfiguration) {
-    this.rolebindingConfig = rolebindingConfig || _accessConfig
+  constructor(rolebindingConfig: RolebindingConfiguration) {
+    this.rolebindingConfig = rolebindingConfig
   }
 
   /**

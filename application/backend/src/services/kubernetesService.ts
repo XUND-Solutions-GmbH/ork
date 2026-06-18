@@ -42,8 +42,8 @@ export class KubernetesService implements Authorizer {
    * @param {ConfigValues} options.config The application config
    * @param {RolebindingConfigService} rolebindingConfigService a service to handle the configuration on rolebindings
    */
-  constructor(options: { config: ConfigValues }, rolebindingConfigService?: RolebindingConfigService) {
-    this.rolebindingConfigService = rolebindingConfigService || new RolebindingConfigService()
+  constructor(options: { config: ConfigValues }, rolebindingConfigService: RolebindingConfigService) {
+    this.rolebindingConfigService = rolebindingConfigService
     this.logger = getLoggerForService(this, options.config)
   }
 
@@ -171,14 +171,11 @@ export class KubernetesService implements Authorizer {
         binding.subjects = [sbj]
 
         const rolebindingResponse = this.isClusterRole(params.role)
-          ? await this.k8sApi.createClusterRoleBindingWithHttpInfo({
-              body: binding as V1ClusterRoleBinding,
-            })
+          ? await this.k8sApi.createClusterRoleBindingWithHttpInfo({ body: binding as V1ClusterRoleBinding })
           : await this.k8sApi.createNamespacedRoleBindingWithHttpInfo({
               namespace: 'default',
               body: binding as V1RoleBinding,
             })
-
         this.logger.info({
           message: `Add user [${params.username}] to cluster [${params.cluster}] with role: [${params.role}]`,
         })

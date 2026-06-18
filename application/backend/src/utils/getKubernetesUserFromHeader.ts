@@ -1,23 +1,44 @@
+import { Request } from 'express'
 import { ORKError, InternalServerErrorCode } from '../errors'
+import { AccessConfigService, RawAccessConfig } from '../services/accessConfigService'
+
+type UserHeaderConfig = { userHeaderName: string }
+
+const userHeaderConfigExtractor = (raw: RawAccessConfig): UserHeaderConfig => ({
+  userHeaderName: raw.userHeaderName,
+})
+
+const { userHeaderName } = AccessConfigService.extract(userHeaderConfigExtractor)
+
+/**
+ * A function to read username from vouch header
+ * @param {Request} request The request with the vouch header
+ * @throws {ORKError} Thrown when the user header is not an email address
+ * @returns {string} email address of user
+ */
+export function getKubernetesUserFromHeader(request: Request): string {
+  const user = request.headers[userHeaderName]
+  return getKubernetesUserFromHeaderValue(user)
+}
 
 /**
  * A function to format a user header for kubernetes api
- * @param {string | string[]} userHeader The user header from the request
+ * @param {string | string[]} user The user header from the request
  * @throws {ORKError} Thrown when the user header is not a string
  * @throws {ORKError} Thrown when the user header is not a email address
  * @returns {string} A single username for kubernetes
  */
-export default function getKubernetesUserFromHeader(userHeader?: string | string[]): string {
-  if (Array.isArray(userHeader)) {
+export function getKubernetesUserFromHeaderValue(user: string | string[] | undefined): string {
+  if (!user || Array.isArray(user) || user.includes(',')) {
     throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.AnyInternalConnectionError, {
-      description: `user header format mismatch`,
+      description: `Auth proxy header format mismatch`,
     })
   }
-  const kubernetesUser = userHeader && userHeader.includes('@') ? userHeader : undefined
-  if (!kubernetesUser) {
+  if (!user.includes('@') || !user.includes('.')) {
     throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.AnyInternalConnectionError, {
-      description: `Cannot get email address from user header [${userHeader}]`,
+      description: `Cannot get email address from user header [${user}]`,
     })
   }
-  return kubernetesUser
+
+  return user
 }

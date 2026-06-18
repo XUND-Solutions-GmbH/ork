@@ -1,7 +1,7 @@
 import { EndpointImplementation } from '../../../../rest-server-express'
 import { AuthorizeUserForTargetEndpoint } from '../../../../common'
 import { AuthorizationController } from '../../controllers'
-import getKubernetesUserFromHeader from '../../utils/getKubernetesUserFromHeader'
+import { getKubernetesUserFromHeader } from '../../utils/getKubernetesUserFromHeader'
 import { MissingParamError } from '../../errors'
 
 /**
@@ -18,7 +18,7 @@ export const createAuthorizeUserForTarget =
         : undefined
       const params = {
         area: urlParameters.area,
-        username: getKubernetesUserFromHeader(request.headers['x-vouch-user']),
+        username: getKubernetesUserFromHeader(request),
         target: urlParameters.target,
         permission: request.body.permission,
         context: parsedContext,

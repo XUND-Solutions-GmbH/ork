@@ -1,7 +1,8 @@
 import { EndpointImplementation } from '../../../../rest-server-express'
 import { GetUserRolebindingsEndpoint, PermissionsForUserResponse } from '../../../../common'
-import { RolebindingConfigService } from '../../services'
-import getKubernetesUserFromHeader from '../../utils/getKubernetesUserFromHeader'
+import { RolebindingConfigService, AccessConfigService } from '../../services'
+import { getKubernetesUserFromHeader } from '../../utils/getKubernetesUserFromHeader'
+import { rolebindingConfigExtractor } from '../../services/rolebindingConfig'
 
 /**
  * Creates and endpoint for listing roles from config
@@ -10,10 +11,10 @@ import getKubernetesUserFromHeader from '../../utils/getKubernetesUserFromHeader
 export const createGetUserRolebindingsRoute =
   (): EndpointImplementation<GetUserRolebindingsEndpoint> =>
   async ({ request }) => {
-    const rolebindingConfigService = new RolebindingConfigService()
-    const permissionsPerCluster = rolebindingConfigService.getPermissionsForUser(
-      getKubernetesUserFromHeader(request.headers['x-vouch-user']),
+    const rolebindingConfigService = new RolebindingConfigService(
+      AccessConfigService.extract(rolebindingConfigExtractor),
     )
+    const permissionsPerCluster = rolebindingConfigService.getPermissionsForUser(getKubernetesUserFromHeader(request))
 
     const clusterPermissionsResponse: PermissionsForUserResponse[] = []
     if (permissionsPerCluster === undefined)

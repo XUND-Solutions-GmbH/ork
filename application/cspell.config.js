@@ -2,7 +2,7 @@
 const nonEnglishWords = []
 
 // Names of compaines/technologies/etc... not in default cspell dictionaries
-const names = ['xund', 'ork', 'doktor', 'asciinema']
+const names = ['xund', 'ork', 'doktor', 'asciinema', 'xundai']
 
 // Miscellaneous words cspell can't recognize
 const miscFalsePositives = ['uuidv', 'xsid', 'xaut', 'xauthz']

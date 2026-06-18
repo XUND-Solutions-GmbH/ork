@@ -12,6 +12,8 @@ import { AuthorizationController } from '../controllers'
 import { getLoggerForService } from './logger'
 import { RolebindingSchedulerService } from './rolebindingSchedulerService'
 import { Evaluator } from './evaluator'
+import { AccessConfigService } from './accessConfigService'
+import { rolebindingConfigExtractor } from './rolebindingConfig'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 
 /**
@@ -70,7 +72,10 @@ export class ORKWeb {
 
     this.expressApp.use(useAuthentication())
 
-    const kubernetesService = new KubernetesService({ config: this.options.config }, this.rolebindingConfigService)
+    const rolebindingConfig = AccessConfigService.extract(rolebindingConfigExtractor)
+    const rolebindingConfigService = this.rolebindingConfigService ?? new RolebindingConfigService(rolebindingConfig)
+    const kubernetesService = new KubernetesService({ config: this.options.config }, rolebindingConfigService)
+
     this.rolebindingSchedulerService = new RolebindingSchedulerService(
       { config: this.options.config },
       kubernetesService,
@@ -78,7 +83,7 @@ export class ORKWeb {
     await this.rolebindingSchedulerService.init()
     const authorizationController = new AuthorizationController({ config: this.options.config })
     authorizationController.addChain(KubernetesService.AREA_NAME, kubernetesService, [
-      (this.rolebindingConfigService || new RolebindingConfigService()) as Evaluator,
+      rolebindingConfigService as Evaluator,
     ])
 
     this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService, authorizationController }))
