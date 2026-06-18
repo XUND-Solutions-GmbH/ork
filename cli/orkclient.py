@@ -171,15 +171,34 @@ def resolve_permissions(area, target):
                 print('Permission not in options')
 
 def add_permission(area, target, permission, vouch_cookie):
+    payload = {"permission" : permission}
+    macserial = get_mac_serial()
+    if macserial:
+        payload["context"] = {"serialNumber" : macserial}
+
     permission_resp = requests.post(
         AUTHZ_URL + 'api/v1/areas/%s/authorizations' % (area if target is None else '%s/targets/%s' % (area, target)),
         headers = {'Cookie': vouch_cookie},
-        json = {"permission" : permission})
+        json = payload)
     permission_resp.raise_for_status()
     if permission_resp.status_code != 201:
         print('Error adding permission: %s' % permission_resp.text)
     else:
         print('User authorized for %s on %s' % (permission, area if target is None else '%s:%s' % (area, target)))
+
+def get_mac_serial():
+    try:
+        output = subprocess.check_output(
+            ["ioreg", "-l"]
+        ).decode()
+
+        for line in output.split("\n"):
+            if "IOPlatformSerialNumber" in line:
+                return line.split("=")[1].replace('"', '').strip()
+        return None
+    except Exception as e:
+        return None
+
 
 def get_vouchcookie(start_browser, vouch_cookie):
     if vouch_cookie:
