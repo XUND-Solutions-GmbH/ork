@@ -31,14 +31,14 @@ export type FilterTypePerFields<T> = {
   [K in keyof T]?: T[K] extends object
     ? ObjectFilterType
     : T[K] extends number | undefined
-    ? NumberFilterType
-    : T[K] extends string | undefined
-    ? StringFilterType
-    : T[K] extends Date | undefined
-    ? DateFilterType
-    : T[K] extends Boolean | undefined
-    ? BooleanFilterType
-    : never
+      ? NumberFilterType
+      : T[K] extends string | undefined
+        ? StringFilterType
+        : T[K] extends Date | undefined
+          ? DateFilterType
+          : T[K] extends boolean | undefined
+            ? BooleanFilterType
+            : never
 }
 
 export type FilterType<T> = FilterTypePerFields<T> | FallbackFilterType<T>

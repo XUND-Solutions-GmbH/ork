@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 export class EnvironmentValidator<T extends object> {
   /**
    * @returns a list about the missing keys
@@ -23,5 +22,8 @@ export class EnvironmentValidator<T extends object> {
     this.requiredKeys.push(key)
   }
 
-  constructor(private readonly environment: T, private readonly requiredKeys: Array<keyof T>) {}
+  constructor(
+    private readonly environment: T,
+    private readonly requiredKeys: Array<keyof T>,
+  ) {}
 }

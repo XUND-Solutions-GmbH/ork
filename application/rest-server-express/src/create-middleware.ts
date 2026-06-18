@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 import { Request, Response, Router } from 'express'
 import { Endpoint, Method, RestApi } from '../../rest-core'
 

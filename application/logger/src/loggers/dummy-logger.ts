@@ -11,4 +11,4 @@ export const getDummyLogger = (scope: string) =>
     warn: () => undefined,
     error: () => undefined,
     scope,
-  } as Logger)
+  }) as Logger

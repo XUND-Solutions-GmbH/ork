@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 import { DisposableService } from '../../generic-utils'
 import { Logger } from './logger'
 import { colors } from './loggers/console-logger'

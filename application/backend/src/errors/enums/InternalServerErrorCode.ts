@@ -2,7 +2,6 @@
  * Use Errorcode when an issue is caused by a backend issue
  * e.g: Invalid db object found in database --> backend issue
  */
-// eslint-disable-next-line no-shadow
 export enum InternalServerErrorCode {
   AnyInternalConnectionError = 'XAUT001',
 

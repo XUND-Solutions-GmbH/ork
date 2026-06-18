@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 import Semaphore from 'semaphore-async-await'
 import { DisposableService } from './disposable-service'
 

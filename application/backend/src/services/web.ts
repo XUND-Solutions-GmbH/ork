@@ -8,8 +8,10 @@ import { createErrorHandler, createNotFoundHandler } from '../handlers'
 import { LogLifecycle } from '../utils/add-lifecycle-logging'
 import { createOrkApiRoutes } from '../routes/OrkApi'
 import { useAuthentication } from '../middlewares/authentication'
+import { AuthorizationController } from '../controllers'
 import { getLoggerForService } from './logger'
 import { RolebindingSchedulerService } from './rolebindingSchedulerService'
+import { Evaluator } from './evaluator'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 
 /**
@@ -74,7 +76,12 @@ export class ORKWeb {
       kubernetesService,
     )
     await this.rolebindingSchedulerService.init()
-    this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService }))
+    const authorizationController = new AuthorizationController({ config: this.options.config })
+    authorizationController.addChain(KubernetesService.AREA_NAME, kubernetesService, [
+      (this.rolebindingConfigService || new RolebindingConfigService()) as Evaluator,
+    ])
+
+    this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService, authorizationController }))
 
     this.expressApp.use(
       createErrorHandler({
