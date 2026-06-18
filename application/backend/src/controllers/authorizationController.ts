@@ -81,6 +81,7 @@ export class AuthorizationController {
           const expiry = (
             await evaluateAccess({
               username: params.username,
+              area: params.area,
               target: params.target,
               permission: params.permission,
               context: params.context,

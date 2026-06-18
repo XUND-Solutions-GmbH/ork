@@ -10,7 +10,7 @@ export class MissingParamError extends ORKError {
    */
   constructor(param: string, area?: string) {
     super('BAD_REQUEST', 'MISSING_PARAM', undefined, {
-      description: `Parameter ${param} needed to authorize${area ? area : ''}`,
+      description: `Parameter ${param} needed to authorize${area ? ` in ${area}` : ''}`,
       data: param,
     })
   }

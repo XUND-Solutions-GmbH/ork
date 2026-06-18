@@ -107,7 +107,9 @@ export class MosyleService implements Evaluator {
             headers: { Authorization: `Bearer ${loginToken}` },
           })
           this.logger.debug({ message: `Mosyle devices status: ${status}` })
-          const userDevice = data.response[0].devices.find((d: Device) => d.useremail == params.username) as Device
+          const userDevice = data.response?.[0]?.devices?.find((d: Device) => d.useremail == params.username) as
+            | Device
+            | undefined
           if (userDevice) return userDevice.serial_number === params.serialNumber
         }
         return false
@@ -139,7 +141,9 @@ export class MosyleService implements Evaluator {
     this.logger.debug({
       message: `Mosyle login status: ${status} (Authorization: ${headers['authorization'] !== undefined})`,
     })
-    const token = headers['authorization'].split(' ')[1]
+    const authHeader = headers['authorization']
+    if (!authHeader) return undefined
+    const token = authHeader.split(' ')[1]
     const expiry = this.getJwtExpiry(token)
     if (expiry) this.bearerToken = { token, expiry }
     else return undefined
