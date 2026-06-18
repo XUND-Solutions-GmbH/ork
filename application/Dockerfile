@@ -38,7 +38,6 @@ COPY --from=build /home/node/ork/rest-core/package.json /home/node/ork/rest-core
 
 COPY --from=build /home/node/ork/rest-server-express/dist /home/node/ork/rest-server-express/dist
 COPY --from=build /home/node/ork/rest-server-express/package.json /home/node/ork/rest-server-expres/package.json
-COPY --from=build /home/node/ork/rest-server-express/node_modules /home/node/ork/rest-server-expres/node_modules
 
 COPY --from=build /home/node/ork/schema-validator/dist /home/node/ork/schema-validator/dist
 COPY --from=build /home/node/ork/schema-validator/package.json /home/node/ork/schema-validator/package.json
