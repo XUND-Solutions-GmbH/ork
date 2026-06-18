@@ -32,4 +32,4 @@ export const getConsoleLogger = (scope: string) =>
         entry.message,
         entry.error,
       ),
-  } as Logger)
+  }) as Logger

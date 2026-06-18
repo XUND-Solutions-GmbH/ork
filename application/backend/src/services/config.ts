@@ -46,7 +46,7 @@ export const getDefaultConfigValues = (env = process.env) =>
     logEntriesToPersist: env.LOG_ENTRIES_TO_PERSIST?.split(',') || ['warn', 'error'],
     sessionIdCookieName: env.SESSION_ID_NAME || 'xsid',
     foxpassApiKey: env.FOXPASS_API_KEY,
-  } as ConfigValues)
+  }) as ConfigValues
 
 export class ConfigService implements ConfigValues {
   system!: string

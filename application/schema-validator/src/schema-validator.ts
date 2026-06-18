@@ -1,4 +1,4 @@
-/* eslint-disable require-jsdoc */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import Ajv, { ErrorObject, Options, ValidateFunction } from 'ajv'
 import useFormats from 'ajv-formats'
 import { JTDDataType } from 'ajv/dist/core'
@@ -10,7 +10,10 @@ export class SchemaValidator<TSchema extends { definitions: {} }> {
     allErrors: true,
     ...this.ajvOptions,
   })
-  constructor(private readonly schema: TSchema, private readonly ajvOptions?: Options) {
+  constructor(
+    private readonly schema: TSchema,
+    private readonly ajvOptions?: Options,
+  ) {
     useFormats(this.ajv)
   }
 
@@ -32,7 +35,7 @@ export class SchemaValidator<TSchema extends { definitions: {} }> {
    * @param options Options for the schema validation
    * @param options.schemaName The name of the type in the Schema Definitions
    * @param error The error object if validation fails
-   * @throws SchemaValidationError when the validation has been failed
+   * @throws {SchemaValidationError} when the validation has been failed
    * @returns true in case of validation success
    */
   public isValid<T>(

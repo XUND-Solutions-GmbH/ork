@@ -1,5 +1,8 @@
+/* eslint-disable jsdoc/check-param-names */
 import _accessConfig from '../accessConfig.json'
+import { MissingParamError } from '../errors'
 import { CLUSTER_LIST } from './kubernetesService'
+import { AuthorizationInfo, EvaluationResult, Evaluator } from './evaluator'
 import { RawAccessConfig } from './accessConfigService'
 
 export type RolebindingConfiguration = {
@@ -26,7 +29,7 @@ type RoleDefinition = {
   clusterRoles: string[]
 }
 
-export class RolebindingConfigService {
+export class RolebindingConfigService implements Evaluator {
   public rolebindingConfig: RolebindingConfiguration
   /**
    *
@@ -35,6 +38,66 @@ export class RolebindingConfigService {
   constructor(rolebindingConfig: RolebindingConfiguration) {
     this.rolebindingConfig = rolebindingConfig
   }
+
+  /**
+   * @param params.username user to evaluate access for as coming from vouch header
+   * @param params.target cluster to evaluate access on
+   * @param params.permission role to check authorization for
+   * @param params.context ignored
+   * @returns allowed access length if allowed, else 0
+   */
+  implEvaluateAccess =
+    () =>
+      async (params: {
+        username: string
+        target?: string
+        permission?: string
+        context?: Map<string, string>
+      }): Promise<EvaluationResult> => {
+        if (!params.target) throw new MissingParamError('kubernetes', 'target')
+        if (!params.permission) throw new MissingParamError('kubernetes', 'permission')
+        const accessLength = this.getUserClusterAccess(params.username, params.target, params.permission)
+        if (accessLength) {
+          return { expiryHours: accessLength }
+        } else {
+          return { expiryHours: 0 }
+        }
+      }
+
+  /**
+   * @param params.username user to evaluate access for as coming from vouch header
+   * @param params.target cluster to evaluate access on
+   * @param params.context ignored
+   * @returns list of allowed roles per cluster
+   */
+  implGetAccessesInfo =
+    () =>
+      async (params: {
+        username: string
+        target?: string
+        context?: Map<string, string>
+      }): Promise<AuthorizationInfo> => {
+        if (params.target) {
+          const permissions = this.getClusterPermissionsForUser(params.username, params.target)
+          return {
+            allowedPermissionsPerTarget: [
+              {
+                target: params.target,
+                permissions: permissions.clusterRoles.concat(permissions.roles),
+              },
+            ],
+          }
+        } else {
+          const permissionsPerTarget = this.getPermissionsForUser(params.username)
+          return {
+            allowedPermissionsPerTarget: Array.from(permissionsPerTarget).flatMap(([cluster, roles]) =>
+              !roles || (roles.clusterRoles.length === 0 && roles.roles.length === 0)
+                ? []
+                : [{ target: cluster, permissions: roles.clusterRoles.concat(roles.roles) }],
+            ),
+          }
+        }
+      }
 
   /**
    * A function to get a list of role names for a user for specific cluster

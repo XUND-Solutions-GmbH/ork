@@ -15,6 +15,7 @@ import { InternalServerErrorCode, ORKError } from '../errors'
 export const createErrorHandler =
   (options: { logger: Logger; onError?: (err: Error) => void; config: ConfigValues }): ErrorRequestHandler =>
   (err, _req, res, _next) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     options.onError && options.onError(err)
 
     if (err instanceof SchemaValidationError) {

@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/check-param-names */
 import os from 'os'
 import { existsSync } from 'fs'
 import {
@@ -11,10 +12,12 @@ import {
 } from '@kubernetes/client-node'
 import moment from 'moment'
 import { Logger } from '../../../logger'
-import { ORKError, InternalServerErrorCode } from '../errors'
+import { ORKError, InternalServerErrorCode, MissingParamError } from '../errors'
 import { ConfigValues } from '../services/config'
+import { AuthorizationResult } from '../../../common/src'
 import { RolebindingConfigService } from './rolebindingConfig'
 import { getLoggerForService } from './logger'
+import { Authorizer } from './authorizer'
 
 type AddRoleBindingResponse = {
   code: number
@@ -28,7 +31,8 @@ type AddRoleBindingResponse = {
 
 export const CLUSTER_LIST = ['dev']
 
-export class KubernetesService {
+export class KubernetesService implements Authorizer {
+  static readonly AREA_NAME = 'kubernetes'
   public readonly logger: Logger
   private readonly rolebindingConfigService: RolebindingConfigService
   private k8sApi?: RbacAuthorizationV1Api
@@ -73,6 +77,62 @@ export class KubernetesService {
     return role.startsWith('cluster') || role.startsWith('devops') || role.startsWith('rbac')
   }
 
+  /**
+   * @param params.username user to be authorized as coming from vouch header
+   * @param params.target cluster to authorize for
+   * @param params.permission role to be added
+   * @param params.expiry time to authorize for
+   * @returns Authorization result if successful
+   */
+  implAuthorize =
+    () =>
+      async (params: {
+        username: string
+        target?: string
+        permission?: string
+        expiry?: number
+      }): Promise<AuthorizationResult | undefined> => {
+        this.logger.debug({
+          message: `Authorization for target: ${params.target}, permission ${params.permission}, user ${params.username}`,
+        })
+        if (!params.target || !params.permission)
+          throw new MissingParamError(KubernetesService.AREA_NAME, params.target ? 'permission' : 'target')
+        const addRolebinding = this.implAddRolebindingToCluster()
+        const addRolebindingResponse = await addRolebinding({
+          cluster: params.target,
+          username: params.username,
+          role: params.permission,
+        })
+        this.logger.debug({
+          message: `Authorization result from kubernetes (${addRolebindingResponse.code}) ${addRolebindingResponse.data.result.data}`,
+        })
+        if (addRolebindingResponse.code === 201) {
+          const regex = /expiry:\s*\[(\d+)\s*hours\]/
+          const match = addRolebindingResponse.data.result.data?.match(regex)
+
+          if (addRolebindingResponse.data.result.data && match) {
+            const expiry = parseInt(match[1], 10)
+            return { expiryHours: expiry, message: addRolebindingResponse.data.result.data }
+          } else {
+            throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
+              description: 'Unknown error when getting expiry time from result',
+              data: addRolebindingResponse.data.result.status,
+            })
+          }
+        } else {
+          throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
+            description: 'Unknown error when adding user to cluster',
+            data: addRolebindingResponse.code,
+          })
+        }
+      }
+
+  /**
+   * @param params.username user to be authorized
+   * @param params.cluster cluster to authorize for
+   * @param params.role role to be added
+   * @returns status code for successful binding or typical errors
+   */
   implAddRolebindingToCluster =
     () =>
       async (params: { cluster: string; username: string; role: string }): Promise<AddRoleBindingResponse> => {
@@ -111,8 +171,8 @@ export class KubernetesService {
           binding.subjects = [sbj]
 
           const rolebindingResponse = this.isClusterRole(params.role)
-            ? await this.k8sApi.createClusterRoleBinding(binding)
-            : await this.k8sApi.createNamespacedRoleBinding('default', binding)
+            ? await this.k8sApi.createClusterRoleBindingWithHttpInfo({ body: binding as V1ClusterRoleBinding })
+            : await this.k8sApi.createNamespacedRoleBindingWithHttpInfo({ namespace: 'default', body: binding as V1RoleBinding })
           this.logger.info({
             message: `Add user [${params.username}] to cluster [${params.cluster}] with role: [${params.role}]`,
           })
@@ -120,10 +180,8 @@ export class KubernetesService {
             code: 201,
             data: {
               result: {
-                status: rolebindingResponse.response.statusCode
-                  ? rolebindingResponse.response.statusCode.toString()
-                  : '500',
-                data: `User [${params.username}] added to role [${params.role}] in cluster [${params.cluster}]`,
+                status: rolebindingResponse.httpStatusCode.toString(),
+                data: `User [${params.username}] added to role [${params.role}] in cluster [${params.cluster}], expiry: [${accessLength} hours]`,
               },
             },
           }
@@ -159,6 +217,9 @@ export class KubernetesService {
         }
       }
 
+  /**
+   * @returns Number of bindings deleted
+   */
   implCleanExpiredRolebinding = () => async (): Promise<number> => {
     const now = moment()
     let deleted = 0
@@ -173,14 +234,14 @@ export class KubernetesService {
         }
 
         const clusterRoleBindings = await this.k8sApi.listClusterRoleBinding()
-        for (const binding of clusterRoleBindings.body.items) {
+        for (const binding of clusterRoleBindings.items) {
           if (
             binding.metadata?.name &&
             binding.metadata.name.startsWith('XAUTHZ') &&
             moment(binding.metadata.name.split('_')[1], 'YYYYMMDDHHmmss').isBefore(now)
           ) {
             try {
-              await this.k8sApi.deleteClusterRoleBinding(binding.metadata.name)
+              await this.k8sApi.deleteClusterRoleBinding({ name: binding.metadata.name })
               deleted++
             } catch (err) {
               failed.push(binding.metadata.name)
@@ -188,15 +249,15 @@ export class KubernetesService {
           }
         }
 
-        const roleBindings = await this.k8sApi.listNamespacedRoleBinding('default')
-        for (const rb of roleBindings.body.items) {
+        const roleBindings = await this.k8sApi.listNamespacedRoleBinding({ namespace: 'default' })
+        for (const rb of roleBindings.items) {
           if (
             rb.metadata?.name &&
             rb.metadata.name.startsWith('XAUTHZ') &&
             moment(rb.metadata.name.split('_')[1], 'YYYYMMDDHHmmss').isBefore(now)
           ) {
             try {
-              await this.k8sApi.deleteNamespacedRoleBinding(rb.metadata.name, 'default')
+              await this.k8sApi.deleteNamespacedRoleBinding({ name: rb.metadata.name, namespace: 'default' })
               deleted++
             } catch (err) {
               failed.push(rb.metadata.name)

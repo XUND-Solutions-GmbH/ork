@@ -11,6 +11,10 @@ const integrationErrorTypes = [
    * No api key received or it is invalid
    */
   'MISSING_API_KEY',
+  /**
+   * No target received or it is invalid
+   */
+  'MISSING_PARAM',
 ] as const
 
 /**
