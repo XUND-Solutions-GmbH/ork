@@ -11,6 +11,9 @@ import { useAuthentication } from '../middlewares/authentication'
 import { getLoggerForService } from './logger'
 import { RolebindingSchedulerService } from './rolebindingSchedulerService'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
+import { AccessConfigService } from './accessConfigService'
+import { rolebindingConfigExtractor } from './rolebindingConfig'
+
 
 /**
  * Service that's responsible for serving the public API endpoint
@@ -68,7 +71,10 @@ export class ORKWeb {
 
     this.expressApp.use(useAuthentication())
 
-    const kubernetesService = new KubernetesService({ config: this.options.config }, this.rolebindingConfigService)
+    const rolebindingConfig = AccessConfigService.extract(rolebindingConfigExtractor)
+    const rolebindingConfigService = this.rolebindingConfigService ?? new RolebindingConfigService(rolebindingConfig)
+    const kubernetesService = new KubernetesService({ config: this.options.config }, rolebindingConfigService)
+
     this.rolebindingSchedulerService = new RolebindingSchedulerService(
       { config: this.options.config },
       kubernetesService,
@@ -143,5 +149,5 @@ export class ORKWeb {
       config: ConfigValues
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
-  ) {}
+  ) { }
 }

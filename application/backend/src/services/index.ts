@@ -1,3 +1,4 @@
+export * from './accessConfigService'
 export * from './config'
 export * from './logger'
 export * from './web'

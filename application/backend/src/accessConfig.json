@@ -1,39 +1,60 @@
 {
   "maxExpiryHours": 12,
+  "userHeaderName": "x-vouch-user",
   "rolebindings": [
     {
       "user": "smith@xund.ai",
       "permissions": [
         {
-          "clusters": ["dev", "uat"],
+          "clusters": [
+            "dev",
+            "uat"
+          ],
           "roleDefinitions": {
             "roles": [],
-            "clusterRoles": ["operations"]
+            "clusterRoles": [
+              "operations"
+            ]
           }
         },
         {
-          "clusters": ["beta", "class2"],
+          "clusters": [
+            "beta",
+            "class2"
+          ],
           "roleDefinitions": {
             "roles": [],
-            "clusterRoles": ["cluster-admin"]
+            "clusterRoles": [
+              "cluster-admin"
+            ]
           }
-        }]
+        }
+      ]
     },
     {
       "user": "taylor@xund.ai",
       "permissions": [
         {
-          "clusters": ["dev", "uat"],
+          "clusters": [
+            "dev",
+            "uat"
+          ],
           "roleDefinitions": {
             "roles": [],
-            "clusterRoles": ["security"]
+            "clusterRoles": [
+              "security"
+            ]
           }
         },
         {
-          "clusters": ["medres"],
+          "clusters": [
+            "medres"
+          ],
           "roleDefinitions": {
             "roles": [],
-            "clusterRoles": ["cluster-reader"]
+            "clusterRoles": [
+              "cluster-reader"
+            ]
           }
         }
       ]
