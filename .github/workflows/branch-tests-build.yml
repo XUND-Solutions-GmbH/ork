@@ -4,13 +4,13 @@ name: Build and test ork application on PR
 on:
   pull_request:
     paths:
-      - '*/Dockerfile'
-      - '**.js'
+      - "*/Dockerfile"
+      - "**.js"
 
   workflow_dispatch:
 jobs:
   build:
-    name: Build and push ork app image
+    name: Branch build and test
     runs-on: ubuntu-latest
 
     steps:
@@ -19,10 +19,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: './application/.nvmrc'
+          node-version-file: "./application/.nvmrc"
 
       - name: Install dependencies
-        env: 
+        env:
           HUSKY: 0
         run: |
           yarn ci
