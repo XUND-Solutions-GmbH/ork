@@ -14,6 +14,7 @@ import { RolebindingSchedulerService } from './rolebindingSchedulerService'
 import { Evaluator } from './evaluator'
 import { AccessConfigService } from './accessConfigService'
 import { rolebindingConfigExtractor } from './rolebindingConfig'
+import { MosyleService, mosyleConfigExtractor } from './mosyleService'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 
 /**
@@ -73,7 +74,10 @@ export class ORKWeb {
     this.expressApp.use(useAuthentication())
 
     const rolebindingConfig = AccessConfigService.extract(rolebindingConfigExtractor)
+    const mosyleConfig = AccessConfigService.extract(mosyleConfigExtractor)
     const rolebindingConfigService = this.rolebindingConfigService ?? new RolebindingConfigService(rolebindingConfig)
+    const mosyleService =
+      this.mosyleService ?? new MosyleService({ config: this.options.config, mosyleAccessConfig: mosyleConfig })
     const kubernetesService = new KubernetesService({ config: this.options.config }, rolebindingConfigService)
 
     this.rolebindingSchedulerService = new RolebindingSchedulerService(
@@ -84,6 +88,7 @@ export class ORKWeb {
     const authorizationController = new AuthorizationController({ config: this.options.config })
     authorizationController.addChain(KubernetesService.AREA_NAME, kubernetesService, [
       rolebindingConfigService as Evaluator,
+      mosyleService as Evaluator,
     ])
 
     this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService, authorizationController }))
@@ -149,11 +154,13 @@ export class ORKWeb {
    * @param options The service configuration object
    * @param {ConfigValues} options.config The application config
    * @param {RolebindingConfigService} rolebindingConfigService a service to handle configuration for rolebindings
+   * @param {MosyleService} mosyleService a service to handle device management verification
    */
   constructor(
     public readonly options: {
       config: ConfigValues
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
+    private readonly mosyleService?: MosyleService,
   ) {}
 }

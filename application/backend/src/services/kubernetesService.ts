@@ -96,12 +96,13 @@ export class KubernetesService implements Authorizer {
         message: `Authorization for target: ${params.target}, permission ${params.permission}, user ${params.username}`,
       })
       if (!params.target || !params.permission)
-        throw new MissingParamError(KubernetesService.AREA_NAME, params.target ? 'permission' : 'target')
+        throw new MissingParamError(params.target ? 'permission' : 'target', KubernetesService.AREA_NAME)
       const addRolebinding = this.implAddRolebindingToCluster()
       const addRolebindingResponse = await addRolebinding({
         cluster: params.target,
         username: params.username,
         role: params.permission,
+        expiry: params.expiry,
       })
       this.logger.debug({
         message: `Authorization result from kubernetes (${addRolebindingResponse.code}) ${addRolebindingResponse.data.result.data}`,
@@ -135,7 +136,12 @@ export class KubernetesService implements Authorizer {
    */
   implAddRolebindingToCluster =
     () =>
-    async (params: { cluster: string; username: string; role: string }): Promise<AddRoleBindingResponse> => {
+    async (params: {
+      cluster: string
+      username: string
+      role: string
+      expiry?: number
+    }): Promise<AddRoleBindingResponse> => {
       this.makeApiClient(params.cluster)
       if (!this.k8sApi) {
         throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
@@ -143,11 +149,9 @@ export class KubernetesService implements Authorizer {
         })
       }
 
-      const accessLength = this.rolebindingConfigService.getUserClusterAccess(
-        params.username,
-        params.cluster,
-        params.role,
-      )
+      const accessLength = params.expiry
+        ? params.expiry
+        : this.rolebindingConfigService.getUserClusterAccess(params.username, params.cluster, params.role)
       if (accessLength === undefined) {
         throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sAuthError, {
           description: `User [${params.username}] doesn't have permission to use role [${params.role}] in cluster [${params.cluster}]`,

@@ -52,8 +52,8 @@ export class RolebindingConfigService implements Evaluator {
       permission?: string
       context?: Map<string, string>
     }): Promise<EvaluationResult> => {
-      if (!params.target) throw new MissingParamError('kubernetes', 'target')
-      if (!params.permission) throw new MissingParamError('kubernetes', 'permission')
+      if (!params.target) throw new MissingParamError('target', 'kubernetes')
+      if (!params.permission) throw new MissingParamError('permission', 'kubernetes')
       const accessLength = this.getUserClusterAccess(params.username, params.target, params.permission)
       if (accessLength) {
         return { expiryHours: accessLength }

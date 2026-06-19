@@ -5,6 +5,7 @@ import { Authorizer } from '../services/authorizer'
 import { Evaluator, AuthorizationInfo } from '../services/evaluator'
 import { getLoggerForService } from '../services/logger'
 import { ConfigValues } from '../services/config'
+import { ORKError } from '../errors'
 
 /**
  * A list of evaluators to check before calling authorizer
@@ -75,30 +76,40 @@ export class AuthorizationController {
       let minExpiry = undefined
       let minEvaluator = ''
       for (const e of chain.evaluators) {
-        const evaluateAccess = e.implEvaluateAccess()
-        const expiry = (
-          await evaluateAccess({
-            username: params.username,
-            target: params.target,
-            permission: params.permission,
-            context: params.context,
-          })
-        ).expiryHours
-        this.logger.debug({ message: `Result of evaluator: ${expiry}` })
-        if (expiry === undefined) continue
-        if (expiry === 0) {
-          minExpiry = 0
-          minEvaluator = e.constructor.name
-          break
+        try {
+          const evaluateAccess = e.implEvaluateAccess()
+          const expiry = (
+            await evaluateAccess({
+              username: params.username,
+              area: params.area,
+              target: params.target,
+              permission: params.permission,
+              context: params.context,
+            })
+          ).expiryHours
+          this.logger.debug({ message: `Result of evaluator: ${expiry}` })
+          if (expiry === undefined) continue
+          if (expiry === 0) {
+            minExpiry = 0
+            minEvaluator = e.constructor.name
+            break
+          }
+          if (!minExpiry) minExpiry = expiry
+          if (expiry < minExpiry) minExpiry = expiry
+        } catch (error) {
+          if (error instanceof ORKError)
+            this.logger.warn({
+              message: `Exception in evaluator ${e.constructor.name}: ${error.message}:${error.details?.description}`,
+            })
+          throw error
         }
-        if (!minExpiry) minExpiry = expiry
-        if (expiry < minExpiry) minExpiry = expiry
       }
       this.logger.debug({ message: `Expiry based on minimal result: ${minExpiry}` })
       if (minExpiry === 0) return { expiryHours: 0, message: minEvaluator }
       const authorize = chain.authorizer.implAuthorize()
       const authorizationResult = await authorize({
         username: params.username,
+        area: params.area,
         target: params.target,
         permission: params.permission,
         expiry: minExpiry,
@@ -122,12 +133,7 @@ export class AuthorizationController {
    */
   implGetChainInfo =
     () =>
-    async (params: {
-      area: string
-      username: string
-      target?: string
-      context?: Map<string, string>
-    }): Promise<AuthorizationInfo | undefined> => {
+    async (params: { area: string; username: string; target?: string }): Promise<AuthorizationInfo | undefined> => {
       this.logger.debug({
         message: `Received chain info request for area ${params.area} target ${params.target}`,
       })
@@ -140,7 +146,6 @@ export class AuthorizationController {
         const accessInfoResult = await getAccessInfo({
           username: params.username,
           target: params.target,
-          context: params.context,
         })
         this.logger.debug({ message: `Result of evaluator: ${JSON.stringify(accessInfoResult)}` })
         authorizationInfos.push(accessInfoResult)
