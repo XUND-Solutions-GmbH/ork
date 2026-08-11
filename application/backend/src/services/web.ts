@@ -71,6 +71,7 @@ export class ORKWeb {
       next()
     })
 
+    this.expressApp.get('/status', (_req, res) => res.sendStatus(200))
     this.expressApp.use(useAuthentication())
 
     const rolebindingConfig = AccessConfigService.extract(rolebindingConfigExtractor)
@@ -162,5 +163,5 @@ export class ORKWeb {
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
     private readonly mosyleService?: MosyleService,
-  ) {}
+  ) { }
 }
