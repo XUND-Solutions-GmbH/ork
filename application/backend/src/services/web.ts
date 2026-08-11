@@ -15,9 +15,9 @@ import { Evaluator } from './evaluator'
 import { AccessConfigService } from './accessConfigService'
 import { rolebindingConfigExtractor } from './rolebindingConfig'
 import { MosyleService, mosyleConfigExtractor } from './mosyleService'
-import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 import { Authorizer } from './authorizer'
 import { chainConfigExtractor, resolveChains } from './chainConfig'
+import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 
 /**
  * Service that's responsible for serving the public API endpoint
@@ -176,5 +176,5 @@ export class ORKWeb {
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
     private readonly mosyleService?: MosyleService,
-  ) { }
+  ) {}
 }

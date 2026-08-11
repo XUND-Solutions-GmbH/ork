@@ -13,4 +13,5 @@ export enum InternalServerErrorCode {
   TooLongRequestedSSHAccessError = 'XAUT003',
   K8sSetupError = 'XAUT004',
   K8sAuthError = 'XAUT005',
+  AccessConfigError = 'XAUT006',
 }

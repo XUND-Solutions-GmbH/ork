@@ -1,10 +1,10 @@
 {
   "name": "application",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "scripts": {
     "build": "tsc --build",
-    "clean": "rimraf backend/dist **/tsconfig.tsbuildinfo tsconfig.tsbuildinfo common/dist auth/dist generic-utils/dist i18n/dist logger/dist rest-core/dist rest-server-express/dist schema-validator/dist service-utils/dist",
+    "clean": "rimraf -g backend/dist **/tsconfig.tsbuildinfo tsconfig.tsbuildinfo common/dist auth/dist generic-utils/dist i18n/dist logger/dist rest-core/dist rest-server-express/dist schema-validator/dist service-utils/dist",
     "lint:ci": "eslint --max-warnings 0 . --ext .tsx,.ts,.jsx,.js --cache -f json -o coverage/eslint-report.json",
     "lint": "eslint --max-warnings 0 . --ext .tsx,.ts,.jsx,.js --cache",
     "test": "jest",

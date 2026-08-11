@@ -24,7 +24,7 @@
         "lint": "yarn workspace application lint",
         "install": "yarn workspace application install",
         "build": "yarn workspace application build",
-        "clean": "rimraf application/backend/dist **/tsconfig.tsbuildinfo application/tsconfig.tsbuildinfo application/common/dist application/auth/dist application/generic-utils/dist application/i18n/dist application/logger/dist application/rest-core/dist application/rest-server-express/dist application/schema-validator/dist application/service-utils/dist",
+        "clean": "rimraf -g application/backend/dist **/tsconfig.tsbuildinfo application/tsconfig.tsbuildinfo application/common/dist application/auth/dist application/generic-utils/dist application/i18n/dist application/logger/dist application/rest-core/dist application/rest-server-express/dist application/schema-validator/dist application/service-utils/dist",
         "reinstall": "rimraf yarn.lock application/yarn.lock && yarn clean && rimraf node_modules application/node_modules application/backend/node_modules application/common/node_modules application/rest-server-express/node_modules application/schema-validator/node_modules && yarn install && yarn build",
         "test": "yarn workspace application test",
         "cspell": "yarn workspace application cspell",

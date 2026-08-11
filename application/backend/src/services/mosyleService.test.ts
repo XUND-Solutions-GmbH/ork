@@ -143,7 +143,7 @@ describe('mosyleService', () => {
       expect(result).toEqual({ expiryHours: 0 })
     })
 
-    it('Should throw XUNDError (AnyInternalConnectionError) when the Mosyle API returns an AxiosError', async () => {
+    it('Should throw ORKError (AnyInternalConnectionError) when the Mosyle API returns an AxiosError', async () => {
       mockPost.mockRejectedValue(new AxiosError('Network error'))
       await expect(
         service.implEvaluateAccess()({
@@ -155,7 +155,7 @@ describe('mosyleService', () => {
       ).rejects.toMatchObject({ internalServerErrorCode: InternalServerErrorCode.AnyInternalConnectionError })
     })
 
-    it('Should throw XUNDError (UnknownError) for unexpected non-Axios errors from the Mosyle API', async () => {
+    it('Should throw ORKError (UnknownError) for unexpected non-Axios errors from the Mosyle API', async () => {
       mockPost.mockRejectedValue(new Error('Unexpected error'))
       await expect(
         service.implEvaluateAccess()({
