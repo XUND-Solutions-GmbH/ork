@@ -16,6 +16,8 @@ import { AccessConfigService } from './accessConfigService'
 import { rolebindingConfigExtractor } from './rolebindingConfig'
 import { MosyleService, mosyleConfigExtractor } from './mosyleService'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
+import { Authorizer } from './authorizer'
+import { chainConfigExtractor, resolveChains } from './chainConfig'
 
 /**
  * Service that's responsible for serving the public API endpoint
@@ -87,10 +89,21 @@ export class ORKWeb {
     )
     await this.rolebindingSchedulerService.init()
     const authorizationController = new AuthorizationController({ config: this.options.config })
-    authorizationController.addChain(KubernetesService.AREA_NAME, kubernetesService, [
-      rolebindingConfigService as Evaluator,
-      mosyleService as Evaluator,
-    ])
+    const authorizers: Record<string, Authorizer> = {
+      [KubernetesService.AREA_NAME]: kubernetesService,
+    }
+    const evaluators: Record<string, Evaluator> = {
+      rolebinding: rolebindingConfigService,
+      mosyle: mosyleService,
+    }
+    const chainDefinitions = AccessConfigService.extract(chainConfigExtractor)
+    for (const { area, authorizer, evaluators: chainEvaluators } of resolveChains(
+      chainDefinitions,
+      authorizers,
+      evaluators,
+    )) {
+      authorizationController.addChain(area, authorizer, chainEvaluators)
+    }
 
     this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService, authorizationController }))
 
