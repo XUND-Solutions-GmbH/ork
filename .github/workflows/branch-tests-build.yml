@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "*/Dockerfile"
+      - "**.ts"
       - "**.js"
 
   workflow_dispatch:
