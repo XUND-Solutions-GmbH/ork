@@ -1,19 +1,37 @@
 {
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-      "outDir": "dist",
-      "rootDir": "src"
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "references": [
+    {
+      "path": "../common"
     },
-    "references": [
-      {"path": "../common"},
-      {"path": "../schema-validator"},
-      {"path": "../logger"},
-      {"path": "../auth"},
-      {"path": "../rest-server-express"},
-      {"path": "../generic-utils"},
-      {"path": "../service-utils"}
-    ],
-    "include": ["src/**/*", "src/**/*.json"],
-    "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"]
-  }
-  
+    {
+      "path": "../schema-validator"
+    },
+    {
+      "path": "../logger"
+    },
+    {
+      "path": "../auth"
+    },
+    {
+      "path": "../rest-server-express"
+    },
+    {
+      "path": "../generic-utils"
+    },
+    {
+      "path": "../service-utils"
+    }
+  ],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts"
+  ]
+}

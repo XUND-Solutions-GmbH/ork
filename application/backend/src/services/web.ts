@@ -15,6 +15,8 @@ import { Evaluator } from './evaluator'
 import { AccessConfigService } from './accessConfigService'
 import { rolebindingConfigExtractor } from './rolebindingConfig'
 import { MosyleService, mosyleConfigExtractor } from './mosyleService'
+import { Authorizer } from './authorizer'
+import { chainConfigExtractor, resolveChains } from './chainConfig'
 import { ConfigValues, KubernetesService, RolebindingConfigService, getLoggerWithScope } from '.'
 
 /**
@@ -71,6 +73,7 @@ export class ORKWeb {
       next()
     })
 
+    this.expressApp.get('/status', (_req, res) => res.sendStatus(200))
     this.expressApp.use(useAuthentication())
 
     const rolebindingConfig = AccessConfigService.extract(rolebindingConfigExtractor)
@@ -86,10 +89,21 @@ export class ORKWeb {
     )
     await this.rolebindingSchedulerService.init()
     const authorizationController = new AuthorizationController({ config: this.options.config })
-    authorizationController.addChain(KubernetesService.AREA_NAME, kubernetesService, [
-      rolebindingConfigService as Evaluator,
-      mosyleService as Evaluator,
-    ])
+    const authorizers: Record<string, Authorizer> = {
+      [KubernetesService.AREA_NAME]: kubernetesService,
+    }
+    const evaluators: Record<string, Evaluator> = {
+      rolebinding: rolebindingConfigService,
+      mosyle: mosyleService,
+    }
+    const chainDefinitions = AccessConfigService.extract(chainConfigExtractor)
+    for (const { area, authorizer, evaluators: chainEvaluators } of resolveChains(
+      chainDefinitions,
+      authorizers,
+      evaluators,
+    )) {
+      authorizationController.addChain(area, authorizer, chainEvaluators)
+    }
 
     this.expressApp.use(this.options.config.route, createOrkApiRoutes({ kubernetesService, authorizationController }))
 

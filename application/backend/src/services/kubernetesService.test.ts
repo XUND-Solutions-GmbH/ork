@@ -6,6 +6,16 @@ import { RolebindingConfigService } from './rolebindingConfig'
 
 jest.mock('fs', () => ({
   existsSync: jest.fn(),
+  // accessConfigService reads and parses this at import time via the rolebindingConfig -> accessConfigService chain
+  readFileSync: jest.fn(() =>
+    JSON.stringify({
+      userHeaderName: 'x-vouch-user',
+      maxExpiryHours: 12,
+      mosyleEnforcement: [],
+      chains: [],
+      rolebindings: [],
+    }),
+  ),
 }))
 
 jest.mock('@kubernetes/client-node', () => ({

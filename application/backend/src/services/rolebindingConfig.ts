@@ -1,5 +1,4 @@
 /* eslint-disable jsdoc/check-param-names */
-import _accessConfig from '../accessConfig.json'
 import { MissingParamError } from '../errors'
 import { CLUSTER_LIST } from './kubernetesService'
 import { AuthorizationInfo, EvaluationResult, Evaluator } from './evaluator'

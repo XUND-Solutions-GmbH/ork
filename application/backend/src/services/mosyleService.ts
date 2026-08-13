@@ -97,20 +97,28 @@ export class MosyleService implements Evaluator {
             os: 'mac',
             supervised: 'true',
             specific_columns: ['device_name', 'device_type', 'serial_number', 'DeviceAttestationStatus', 'useremail'],
+            page: 1,
           },
         }
         const implLoginToken = this.implGetToken()
         const loginToken = await implLoginToken()
         if (loginToken) {
           this.logger.debug({ message: 'Getting Mosyle device list ...' })
-          const { status, data } = await this.mosyleApi.post(`${MOSYLE_API_VERSION}/devices`, payload, {
-            headers: { Authorization: `Bearer ${loginToken}` },
-          })
-          this.logger.debug({ message: `Mosyle devices status: ${status}` })
-          const userDevice = data.response?.[0]?.devices?.find((d: Device) => d.useremail == params.username) as
-            | Device
-            | undefined
-          if (userDevice) return userDevice.serial_number === params.serialNumber
+          let page = 0
+          let rows = 0
+          do {
+            page++
+            payload.options.page = page
+            const { status, data } = await this.mosyleApi.post(`${MOSYLE_API_VERSION}/devices`, payload, {
+              headers: { Authorization: `Bearer ${loginToken}` },
+            })
+            this.logger.debug({ message: `Mosyle devices status: ${status}` })
+            if (data) {
+              if (rows == 0) ({ rows } = data.response[0])
+              const userDevice = data.response[0].devices.find((d: Device) => d.useremail == params.username) as Device
+              if (userDevice) return userDevice.serial_number === params.serialNumber
+            }
+          } while (rows != 0 && page * 50 < rows)
         }
         return false
       } catch (err) {

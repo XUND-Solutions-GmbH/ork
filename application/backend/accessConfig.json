@@ -9,6 +9,16 @@
       ]
     }
   ],
+  "chains": [
+    {
+      "area": "kubernetes",
+      "authorizer": "kubernetes",
+      "evaluators": [
+        "rolebinding",
+        "mosyle"
+      ]
+    }
+  ],
   "rolebindings": [
     {
       "user": "smith@xund.ai",
