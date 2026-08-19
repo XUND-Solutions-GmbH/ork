@@ -86,7 +86,7 @@ export class ORKWeb {
       this.mosyleService ?? new MosyleService({ config: this.options.config, mosyleAccessConfig: mosyleConfig })
 
     const cluster_list = this.readClusterList()
-    this.logger.info({ message: 'Found config for following cluster:' + cluster_list })
+    this.logger.info({ message: `Found config for following cluster:${cluster_list}` })
     const kubernetesService = new KubernetesService(
       { config: this.options.config },
       rolebindingConfigService,
@@ -207,5 +207,5 @@ export class ORKWeb {
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
     private readonly mosyleService?: MosyleService,
-  ) { }
+  ) {}
 }

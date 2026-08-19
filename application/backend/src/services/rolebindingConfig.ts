@@ -139,7 +139,7 @@ export class RolebindingConfigService implements Evaluator {
   public getPermissionsForUser(username: string): Map<string, RoleDefinition> {
     const clusterPermissions = new Map<string, RoleDefinition>()
     const cluster_list = [
-      ...new Set(this.rolebindingConfig.rolebindings.flatMap((p) => p.permissions.flatMap((p) => p.clusters))),
+      ...new Set(this.rolebindingConfig.rolebindings.flatMap((cp) => cp.permissions.flatMap((p) => p.clusters))),
     ]
     for (const cluster of cluster_list) {
       const roles = this.getClusterPermissionsForUser(username, cluster)
