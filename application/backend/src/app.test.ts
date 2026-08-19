@@ -6,7 +6,7 @@ describe('App', () => {
     const config = new ConfigService({
       environment: 'TEST',
       port: Math.round(Math.random() * 9999) + 10000,
-      clusters: ['dev']
+      clusters: ['dev'],
     })
     const mockMosyleService = {
       implEvaluateAccess: jest.fn().mockReturnValue(async () => ({ expiryHours: undefined })),

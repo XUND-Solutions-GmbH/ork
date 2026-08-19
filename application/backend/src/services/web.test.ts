@@ -11,7 +11,7 @@ describe('ORK module', () => {
     const config = new ConfigService({
       environment: 'TEST',
       port: Math.round(Math.random() * 9999) + 10000,
-      clusters: ['dev']
+      clusters: ['dev'],
     })
     const mockMosyleService = {
       implEvaluateAccess: jest.fn().mockReturnValue(async () => ({ expiryHours: undefined })),
@@ -51,7 +51,7 @@ describe('ORK module', () => {
     const mockSrv = createTestWeb() // To hold the port
     await mockSrv.init()
     const srv = createTestWeb()
-      ; (srv.expressApp.listen as unknown) = (_port: number, cb: (err?: Error) => void) => cb(new Error(':('))
+    ;(srv.expressApp.listen as unknown) = (_port: number, cb: (err?: Error) => void) => cb(new Error(':('))
     await expect(() => srv.init()).rejects.toThrowError()
     await mockSrv.dispose()
     await srv.dispose()
@@ -64,10 +64,10 @@ describe('ORK module', () => {
       expect(srv.server).toBeInstanceOf(Server)
     } else {
       const oldServerClose = srv.server.close
-        ; (srv.server.close as unknown) = (cb: (err?: Error) => void) => {
-          cb(new Error(':('))
-          return srv.server
-        }
+      ;(srv.server.close as unknown) = (cb: (err?: Error) => void) => {
+        cb(new Error(':('))
+        return srv.server
+      }
       await expect(() => srv.dispose()).rejects.toThrow()
       srv.server.close = oldServerClose
       await srv.dispose()

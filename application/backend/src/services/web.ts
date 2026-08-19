@@ -207,5 +207,5 @@ export class ORKWeb {
     },
     private readonly rolebindingConfigService?: RolebindingConfigService,
     private readonly mosyleService?: MosyleService,
-  ) { }
+  ) {}
 }

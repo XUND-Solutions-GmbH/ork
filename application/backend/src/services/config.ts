@@ -59,7 +59,7 @@ export const getDefaultConfigValues = (env = process.env) =>
     mosyleAccessToken: env.MOSYLE_ACCESS_TOKEN,
     mosyleUser: env.MOSYLE_USER,
     mosylePass: env.MOSYLE_PASS,
-    clusters: env.CLUSTERS?.split(',')
+    clusters: env.CLUSTERS?.split(','),
   }) as ConfigValues
 
 export class ConfigService implements ConfigValues {
