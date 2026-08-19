@@ -34,21 +34,33 @@ export class KubernetesService implements Authorizer {
   public readonly logger: Logger
   private readonly rolebindingConfigService: RolebindingConfigService
   private k8sApi?: RbacAuthorizationV1Api
+  private readonly cluster_list: string[]
 
   /**
    * @param options The service configuration object
    * @param {ConfigValues} options.config The application config
    * @param {RolebindingConfigService} rolebindingConfigService a service to handle the configuration on rolebindings
+   * @param cluster_list
    */
-  constructor(options: { config: ConfigValues }, rolebindingConfigService: RolebindingConfigService) {
+  constructor(
+    options: { config: ConfigValues },
+    rolebindingConfigService: RolebindingConfigService,
+    cluster_list: string[],
+  ) {
     this.rolebindingConfigService = rolebindingConfigService
     this.logger = getLoggerForService(this, options.config)
+    this.cluster_list = cluster_list
   }
 
   /**
    * @param cluster name of the cluster
    */
   private makeApiClient(cluster: string): void {
+    if (!this.cluster_list.includes(cluster)) {
+      throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
+        description: `Unknown cluster name [${cluster}]`,
+      })
+    }
     const configFile = `${os.homedir()}/.kube/config-${cluster}`
     if (!existsSync(configFile)) {
       throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
@@ -78,47 +90,47 @@ export class KubernetesService implements Authorizer {
    */
   implAuthorize =
     () =>
-      async (params: {
-        username: string
-        target?: string
-        permission?: string
-        expiry?: number
-      }): Promise<AuthorizationResult | undefined> => {
-        this.logger.debug({
-          message: `Authorization for target: ${params.target}, permission ${params.permission}, user ${params.username}`,
-        })
-        if (!params.target || !params.permission)
-          throw new MissingParamError(params.target ? 'permission' : 'target', KubernetesService.AREA_NAME)
-        const addRolebinding = this.implAddRolebindingToCluster()
-        const addRolebindingResponse = await addRolebinding({
-          cluster: params.target,
-          username: params.username,
-          role: params.permission,
-          expiry: params.expiry,
-        })
-        this.logger.debug({
-          message: `Authorization result from kubernetes (${addRolebindingResponse.code}) ${addRolebindingResponse.data.result.data}`,
-        })
-        if (addRolebindingResponse.code === 201) {
-          const regex = /expiry:\s*\[(\d+)\s*hours\]/
-          const match = addRolebindingResponse.data.result.data?.match(regex)
+    async (params: {
+      username: string
+      target?: string
+      permission?: string
+      expiry?: number
+    }): Promise<AuthorizationResult | undefined> => {
+      this.logger.debug({
+        message: `Authorization for target: ${params.target}, permission ${params.permission}, user ${params.username}`,
+      })
+      if (!params.target || !params.permission)
+        throw new MissingParamError(params.target ? 'permission' : 'target', KubernetesService.AREA_NAME)
+      const addRolebinding = this.implAddRolebindingToCluster()
+      const addRolebindingResponse = await addRolebinding({
+        cluster: params.target,
+        username: params.username,
+        role: params.permission,
+        expiry: params.expiry,
+      })
+      this.logger.debug({
+        message: `Authorization result from kubernetes (${addRolebindingResponse.code}) ${addRolebindingResponse.data.result.data}`,
+      })
+      if (addRolebindingResponse.code === 201) {
+        const regex = /expiry:\s*\[(\d+)\s*hours\]/
+        const match = addRolebindingResponse.data.result.data?.match(regex)
 
-          if (addRolebindingResponse.data.result.data && match) {
-            const expiry = parseInt(match[1], 10)
-            return { expiryHours: expiry, message: addRolebindingResponse.data.result.data }
-          } else {
-            throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
-              description: 'Unknown error when getting expiry time from result',
-              data: addRolebindingResponse.data.result.status,
-            })
-          }
+        if (addRolebindingResponse.data.result.data && match) {
+          const expiry = parseInt(match[1], 10)
+          return { expiryHours: expiry, message: addRolebindingResponse.data.result.data }
         } else {
           throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
-            description: 'Unknown error when adding user to cluster',
-            data: addRolebindingResponse.code,
+            description: 'Unknown error when getting expiry time from result',
+            data: addRolebindingResponse.data.result.status,
           })
         }
+      } else {
+        throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
+          description: 'Unknown error when adding user to cluster',
+          data: addRolebindingResponse.code,
+        })
       }
+    }
 
   /**
    * @param params.username user to be authorized
@@ -128,93 +140,93 @@ export class KubernetesService implements Authorizer {
    */
   implAddRolebindingToCluster =
     () =>
-      async (params: {
-        cluster: string
-        username: string
-        role: string
-        expiry?: number
-      }): Promise<AddRoleBindingResponse> => {
-        this.makeApiClient(params.cluster)
-        if (!this.k8sApi) {
-          throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
-            description: `Something went wrong when setting up connection for cluster [${params.cluster}]`,
-          })
-        }
+    async (params: {
+      cluster: string
+      username: string
+      role: string
+      expiry?: number
+    }): Promise<AddRoleBindingResponse> => {
+      this.makeApiClient(params.cluster)
+      if (!this.k8sApi) {
+        throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
+          description: `Something went wrong when setting up connection for cluster [${params.cluster}]`,
+        })
+      }
 
-        const accessLength = params.expiry
-          ? params.expiry
-          : this.rolebindingConfigService.getUserClusterAccess(params.username, params.cluster, params.role)
-        if (accessLength === undefined) {
-          throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sAuthError, {
-            description: `User [${params.username}] doesn't have permission to use role [${params.role}] in cluster [${params.cluster}]`,
-          })
-        }
-        try {
-          const binding = this.isClusterRole(params.role) ? new V1ClusterRoleBinding() : new V1RoleBinding()
+      const accessLength = params.expiry
+        ? params.expiry
+        : this.rolebindingConfigService.getUserClusterAccess(params.username, params.cluster, params.role)
+      if (accessLength === undefined) {
+        throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sAuthError, {
+          description: `User [${params.username}] doesn't have permission to use role [${params.role}] in cluster [${params.cluster}]`,
+        })
+      }
+      try {
+        const binding = this.isClusterRole(params.role) ? new V1ClusterRoleBinding() : new V1RoleBinding()
 
-          binding.metadata = new V1ObjectMeta()
-          binding.metadata.name = `XAUTHZ_${moment()
-            .add(accessLength, 'hours')
-            .format('YYYYMMDDHHmmss')
-            .toString()}_${params.username.substring(0, 2)}`
-          binding.roleRef = new V1RoleRef()
-          binding.roleRef.name = params.role
-          binding.roleRef.apiGroup = 'rbac.authorization.k8s.io'
-          binding.roleRef.kind = this.isClusterRole(params.role) ? 'ClusterRole' : 'Role'
-          const sbj: RbacV1Subject = new RbacV1Subject()
-          sbj.kind = 'User'
-          sbj.name = params.username
-          binding.subjects = [sbj]
+        binding.metadata = new V1ObjectMeta()
+        binding.metadata.name = `XAUTHZ_${moment()
+          .add(accessLength, 'hours')
+          .format('YYYYMMDDHHmmss')
+          .toString()}_${params.username.substring(0, 2)}`
+        binding.roleRef = new V1RoleRef()
+        binding.roleRef.name = params.role
+        binding.roleRef.apiGroup = 'rbac.authorization.k8s.io'
+        binding.roleRef.kind = this.isClusterRole(params.role) ? 'ClusterRole' : 'Role'
+        const sbj: RbacV1Subject = new RbacV1Subject()
+        sbj.kind = 'User'
+        sbj.name = params.username
+        binding.subjects = [sbj]
 
-          const rolebindingResponse = this.isClusterRole(params.role)
-            ? await this.k8sApi.createClusterRoleBindingWithHttpInfo({ body: binding as V1ClusterRoleBinding })
-            : await this.k8sApi.createNamespacedRoleBindingWithHttpInfo({
+        const rolebindingResponse = this.isClusterRole(params.role)
+          ? await this.k8sApi.createClusterRoleBindingWithHttpInfo({ body: binding as V1ClusterRoleBinding })
+          : await this.k8sApi.createNamespacedRoleBindingWithHttpInfo({
               namespace: 'default',
               body: binding as V1RoleBinding,
             })
-          this.logger.info({
-            message: `Add user [${params.username}] to cluster [${params.cluster}] with role: [${params.role}]`,
-          })
-          return {
-            code: 201,
+        this.logger.info({
+          message: `Add user [${params.username}] to cluster [${params.cluster}] with role: [${params.role}]`,
+        })
+        return {
+          code: 201,
+          data: {
+            result: {
+              status: rolebindingResponse.httpStatusCode.toString(),
+              data: `User [${params.username}] added to role [${params.role}] in cluster [${params.cluster}], expiry: [${accessLength} hours]`,
+            },
+          },
+        }
+      } catch (err) {
+        if (err instanceof ORKError && err.internalServerErrorCode === InternalServerErrorCode.K8sAuthError) {
+          const res = {
+            code: 403,
             data: {
               result: {
-                status: rolebindingResponse.httpStatusCode.toString(),
-                data: `User [${params.username}] added to role [${params.role}] in cluster [${params.cluster}], expiry: [${accessLength} hours]`,
+                status: 'fail',
+                data: err.details?.description,
               },
             },
           }
-        } catch (err) {
-          if (err instanceof ORKError && err.internalServerErrorCode === InternalServerErrorCode.K8sAuthError) {
-            const res = {
-              code: 403,
-              data: {
-                result: {
-                  status: 'fail',
-                  data: err.details?.description,
-                },
-              },
-            }
-            return res
-          }
-          if (err instanceof ORKError && err.internalServerErrorCode === InternalServerErrorCode.K8sSetupError) {
-            const res = {
-              code: 400,
-              data: {
-                result: {
-                  status: 'fail',
-                  data: err.details?.description,
-                },
-              },
-            }
-            return res
-          }
-          throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
-            description: 'Unknown error when adding rolebinding to Kubernetes',
-            data: err,
-          })
+          return res
         }
+        if (err instanceof ORKError && err.internalServerErrorCode === InternalServerErrorCode.K8sSetupError) {
+          const res = {
+            code: 400,
+            data: {
+              result: {
+                status: 'fail',
+                data: err.details?.description,
+              },
+            },
+          }
+          return res
+        }
+        throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.UnknownError, {
+          description: 'Unknown error when adding rolebinding to Kubernetes',
+          data: err,
+        })
       }
+    }
 
   /**
    * @returns Number of bindings deleted
@@ -223,7 +235,7 @@ export class KubernetesService implements Authorizer {
     const now = moment()
     let deleted = 0
     const failed: string[] = []
-    for (const c of CLUSTER_LIST) {
+    for (const c of this.cluster_list) {
       try {
         this.makeApiClient(c)
         if (!this.k8sApi) {
