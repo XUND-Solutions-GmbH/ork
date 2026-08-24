@@ -29,34 +29,38 @@ type AddRoleBindingResponse = {
   }
 }
 
-export const CLUSTER_LIST = ['dev']
-
 export class KubernetesService implements Authorizer {
   static readonly AREA_NAME = 'kubernetes'
   public readonly logger: Logger
   private readonly rolebindingConfigService: RolebindingConfigService
   private k8sApi?: RbacAuthorizationV1Api
+  private readonly cluster_list: string[]
 
   /**
    * @param options The service configuration object
    * @param {ConfigValues} options.config The application config
    * @param {RolebindingConfigService} rolebindingConfigService a service to handle the configuration on rolebindings
+   * @param {string[]} cluster_list list of clusters reachable via kubeconfig
    */
-  constructor(options: { config: ConfigValues }, rolebindingConfigService: RolebindingConfigService) {
+  constructor(
+    options: { config: ConfigValues },
+    rolebindingConfigService: RolebindingConfigService,
+    cluster_list: string[],
+  ) {
     this.rolebindingConfigService = rolebindingConfigService
     this.logger = getLoggerForService(this, options.config)
+    this.cluster_list = cluster_list
   }
 
   /**
    * @param cluster name of the cluster
    */
   private makeApiClient(cluster: string): void {
-    if (!CLUSTER_LIST.includes(cluster)) {
+    if (!this.cluster_list.includes(cluster)) {
       throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
         description: `Unknown cluster name [${cluster}]`,
       })
     }
-
     const configFile = `${os.homedir()}/.kube/config-${cluster}`
     if (!existsSync(configFile)) {
       throw new ORKError('INTERNAL_SERVER_ERROR', undefined, InternalServerErrorCode.K8sSetupError, {
@@ -231,7 +235,7 @@ export class KubernetesService implements Authorizer {
     const now = moment()
     let deleted = 0
     const failed: string[] = []
-    for (const c of CLUSTER_LIST) {
+    for (const c of this.cluster_list) {
       try {
         this.makeApiClient(c)
         if (!this.k8sApi) {

@@ -1,4 +1,6 @@
 import { Server, Socket } from 'net'
+import { readdirSync } from 'fs'
+import os from 'os'
 import express from 'express'
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
@@ -9,6 +11,7 @@ import { LogLifecycle } from '../utils/add-lifecycle-logging'
 import { createOrkApiRoutes } from '../routes/OrkApi'
 import { useAuthentication } from '../middlewares/authentication'
 import { AuthorizationController } from '../controllers'
+import { ConfigurationError } from '../errors'
 import { getLoggerForService } from './logger'
 import { RolebindingSchedulerService } from './rolebindingSchedulerService'
 import { Evaluator } from './evaluator'
@@ -81,7 +84,14 @@ export class ORKWeb {
     const rolebindingConfigService = this.rolebindingConfigService ?? new RolebindingConfigService(rolebindingConfig)
     const mosyleService =
       this.mosyleService ?? new MosyleService({ config: this.options.config, mosyleAccessConfig: mosyleConfig })
-    const kubernetesService = new KubernetesService({ config: this.options.config }, rolebindingConfigService)
+
+    const cluster_list = this.options.config.clusters ?? this.readClusterList()
+    this.logger.info({ message: `Found config for following clusters:${cluster_list}` })
+    const kubernetesService = new KubernetesService(
+      { config: this.options.config },
+      rolebindingConfigService,
+      cluster_list,
+    )
 
     this.rolebindingSchedulerService = new RolebindingSchedulerService(
       { config: this.options.config },
@@ -157,6 +167,27 @@ export class ORKWeb {
     this.logger.debug({
       message: this.openedSockets.size ? `Closing ${this.openedSockets.size} opened sockets` : 'All sockets closed.',
     })
+  }
+
+  private readClusterList(): string[] {
+    const kubeconfig_dir = `${os.homedir()}/.kube/`
+    try {
+      const files = readdirSync(kubeconfig_dir)
+
+      return files
+        .filter((file) => {
+          // Match files starting with "config-"
+          return /^config-/.test(file)
+        })
+        .map((file) => {
+          // Extract the part after "config-"
+          return file.replace(/^config-/, '')
+        })
+        .sort() // Sort alphabetically for consistent ordering
+    } catch (error) {
+      console.error(`Failed to read kubeconfig directory: ${kubeconfig_dir}`, error)
+      throw new ConfigurationError(['.kube/config-'])
+    }
   }
 
   private readonly onConnection = (socket: Socket) => {

@@ -36,6 +36,11 @@ export interface ConfigValues {
    * API user password for mosyle
    */
   mosylePass?: string
+
+  /**
+   * The reachable clusters
+   */
+  clusters?: string[]
 }
 
 const defaultApplicationPort = 8080
@@ -54,6 +59,7 @@ export const getDefaultConfigValues = (env = process.env) =>
     mosyleAccessToken: env.MOSYLE_ACCESS_TOKEN,
     mosyleUser: env.MOSYLE_USER,
     mosylePass: env.MOSYLE_PASS,
+    clusters: env.CLUSTERS?.split(','),
   }) as ConfigValues
 
 export class ConfigService implements ConfigValues {
@@ -63,6 +69,7 @@ export class ConfigService implements ConfigValues {
   mosyleAccessToken?: string
   mosyleUser?: string
   mosylePass?: string
+  clusters?: string[]
 
   /**
    * @param values The initial values

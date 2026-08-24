@@ -67,7 +67,7 @@ describe('kubernetesService', () => {
       maxExpiryHours: 420,
     })
 
-    service = new KubernetesService({ config: mockConfig }, rolebindingConfigService)
+    service = new KubernetesService({ config: mockConfig }, rolebindingConfigService, ['dev'])
   })
 
   describe('implAuthorize', () => {

@@ -56,8 +56,9 @@ COPY --from=build /home/node/ork/backend/dist /home/node/ork/backend/dist
 COPY --from=build /home/node/ork/backend/package.json /home/node/ork/backend/package.json
 COPY --from=build /home/node/ork/backend/node_modules /home/node/ork/backend/node_modules
 
-#Copy kube configs
-COPY --chown=node kubeconfig/config-dev /home/node/.kube/config-dev
+#Copy configs
+#COPY --chown=node:node backend/accessConfig.json /home/node/ork/backend/accessConfig.json
+#COPY --chown=node kubeconfig/config-dev /home/node/.kube/config-dev
 
 USER node
 
